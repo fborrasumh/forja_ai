@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ForjaIA · Crea tu app docente de un solo fichero</title>
+<meta name="description" content="ForjaIA convierte la descripción de una tarea docente en una app HTML de un solo fichero, lista para publicar en GitHub Pages. Universidad Miguel Hernández de Elche.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tinta:#0F2237;
+  --acero:#2E4B6B;
+  --acero-claro:#7C93AC;
+  --papel:#F2F5F8;
+  --papel-alto:#FFFFFF;
+  --brasa:#E4572E;
+  --brasa-suave:#FBE7DF;
+  --forjado:#0E7C6B;
+  --linea:#D3DCE5;
+  --sombra:0 1px 0 rgba(15,34,55,.06), 0 12px 32px -20px rgba(15,34,55,.5);
+  --display:"Bricolage Grotesque",Georgia,serif;
+  --texto:"Instrument Sans",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--papel);
+  color:var(--tinta);
+  font-family:var(--texto);
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--acero)}
+:focus-visible{outline:3px solid var(--brasa);outline-offset:2px;border-radius:4px}
+
+/* ── Cabecera: el yunque ─────────────────────────────── */
+.hero{
+  background:var(--tinta);
+  color:#EAF1F7;
+  padding:36px 20px 0;
+  position:relative;
+  overflow:hidden;
+}
+.hero::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--brasa),transparent);
+}
+.hero-in{max-width:1080px;margin:0 auto;position:relative}
+.lang{position:absolute;top:2px;right:0;display:flex;gap:5px;z-index:2}
+.lang-b{background:transparent;border:1px solid #3E5C7D;color:#A9C0D4;font-size:12px;font-weight:700;padding:5px 11px;letter-spacing:.06em}
+.lang-b:hover{border-color:var(--brasa);color:#fff}
+.lang-b[aria-pressed="true"]{background:var(--brasa);border-color:var(--brasa);color:#fff}
+.eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--acero-claro);margin:0 0 14px;
+}
+.hero h1{
+  font-family:var(--display);font-weight:800;font-size:clamp(38px,7vw,72px);
+  line-height:.95;letter-spacing:-.03em;margin:0 0 14px;
+}
+.hero h1 em{font-style:normal;color:var(--brasa)}
+.hero p.lede{
+  max-width:56ch;font-size:17px;color:#B9CADA;margin:0 0 26px;
+}
+.rail{display:flex;gap:0;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.14)}
+.rail-step{
+  flex:1 1 200px;padding:16px 18px 20px;border-right:1px solid rgba(255,255,255,.14);
+  display:flex;gap:12px;align-items:flex-start;
+}
+.rail-step:last-child{border-right:none}
+.rail-num{
+  font-family:var(--mono);font-size:12px;color:var(--tinta);background:var(--acero-claro);
+  width:22px;height:22px;flex:none;display:grid;place-items:center;border-radius:3px;font-weight:600;
+}
+.rail-step[data-on="1"] .rail-num{background:var(--brasa);color:#fff}
+.rail-step[data-on="1"] .rail-t{color:#fff}
+.rail-t{font-weight:600;font-size:14px;color:#9FB4C7;display:block}
+.rail-d{font-size:12.5px;color:#7C93AC;display:block}
+
+/* ── Estructura ──────────────────────────────────────── */
+main{max-width:1080px;margin:0 auto;padding:28px 20px 80px}
+.panel{
+  background:var(--papel-alto);border:1px solid var(--linea);border-radius:10px;
+  box-shadow:var(--sombra);margin-bottom:22px;overflow:hidden;
+}
+.panel-head{
+  display:flex;align-items:baseline;gap:12px;padding:16px 20px;border-bottom:1px solid var(--linea);
+  background:linear-gradient(180deg,#fff, #FAFCFE);
+}
+.panel-head h2{
+  font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.015em;margin:0;
+}
+.panel-head .tag{
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--acero-claro);
+}
+.panel-body{padding:20px}
+.hint{font-size:13.5px;color:#5D7691;margin:0 0 16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+
+label{display:block;font-size:13px;font-weight:600;margin:0 0 5px;color:var(--acero)}
+input[type=text],input[type=password],textarea,select{
+  width:100%;padding:10px 12px;border:1px solid var(--linea);border-radius:7px;
+  font-family:var(--texto);font-size:14.5px;color:var(--tinta);background:#fff;
+}
+textarea{resize:vertical;min-height:88px;line-height:1.5}
+input::placeholder,textarea::placeholder{color:#9DB0C2}
+.field{margin-bottom:14px}
+.mono{font-family:var(--mono);font-size:13px}
+
+button{font-family:var(--texto);cursor:pointer;border-radius:7px;font-weight:600;font-size:14.5px;border:1px solid transparent}
+.btn-primary{background:var(--brasa);color:#fff;padding:11px 20px}
+.btn-primary:hover{background:#C9441F}
+.btn-primary:disabled{background:#C8D3DD;cursor:not-allowed}
+.btn-ghost{background:#fff;border-color:var(--linea);color:var(--acero);padding:10px 16px}
+.btn-ghost:hover{border-color:var(--acero-claro);background:#F7FAFC}
+.btn-mini{background:#fff;border-color:var(--linea);color:#7A5C52;padding:5px 10px;font-size:12.5px}
+.btn-mini:hover{border-color:var(--brasa);color:var(--brasa)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
+.chip{
+  background:#fff;border:1px solid var(--linea);border-radius:999px;padding:6px 13px;
+  font-size:13px;color:var(--acero);cursor:pointer;
+}
+.chip:hover{border-color:var(--brasa);color:var(--brasa)}
+
+.status{font-size:13.5px;margin-left:4px;color:#5D7691}
+.status[data-kind="err"]{color:var(--brasa);font-weight:600}
+.status[data-kind="ok"]{color:var(--forjado);font-weight:600}
+
+/* ── Campos de la app ────────────────────────────────── */
+.campo{
+  border:1px solid var(--linea);border-left:3px solid var(--acero-claro);border-radius:8px;
+  padding:14px;margin-bottom:12px;background:#FBFDFE;
+}
+.campo-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.campo-top .n{font-family:var(--mono);font-size:11.5px;color:var(--acero-claro);letter-spacing:.1em}
+.campo .grid2{gap:10px}
+.check{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--acero);font-weight:500}
+.check input{width:auto;margin:0}
+
+/* ── Previsualización ────────────────────────────────── */
+.preview-wrap{border:1px solid var(--linea);border-radius:9px;overflow:hidden;background:#fff}
+.preview-bar{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--tinta);
+}
+.dot{width:9px;height:9px;border-radius:50%;background:#4A6787}
+.preview-url{
+  font-family:var(--mono);font-size:11.5px;color:#8FA7BE;margin-left:8px;overflow:hidden;
+  white-space:nowrap;text-overflow:ellipsis;
+}
+iframe{width:100%;height:560px;border:0;display:block;background:#fff}
+pre.code{
+  background:var(--tinta);color:#CFE0EE;padding:16px;border-radius:8px;overflow:auto;
+  font-family:var(--mono);font-size:12px;line-height:1.6;max-height:340px;margin:0;
+}
+details{border:1px solid var(--linea);border-radius:8px;padding:0;margin-top:14px;background:#fff}
+details>summary{
+  cursor:pointer;padding:12px 16px;font-weight:600;font-size:14px;color:var(--acero);list-style:none;
+}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸ ";color:var(--brasa)}
+details[open]>summary::before{content:"▾ "}
+details .inner{padding:0 16px 16px}
+
+.aviso{
+  background:var(--brasa-suave);border:1px solid #F0C4B2;border-radius:8px;padding:13px 15px;
+  font-size:13.5px;color:#8A3617;margin-bottom:18px;
+}
+.aviso strong{font-weight:700}
+.hidden{display:none}
+footer{
+  max-width:1080px;margin:0 auto;padding:0 20px 60px;font-size:13px;color:#6E8299;
+}
+footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 16px}
+@media(prefers-reduced-motion:no-preference){
+  .panel{animation:rise .38s cubic-bezier(.2,.7,.3,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-in">
+    <div class="lang"><button type="button" class="lang-b" data-lang="es">ES</button><button type="button" class="lang-b" data-lang="en">EN</button><button type="button" class="lang-b" data-lang="pt">PT</button></div>
+    <p class="eyebrow">IAgen2027 · Study Abroad · Universidad Miguel Hernández de Elche</p>
+    <h1>Forja<em>IA</em></h1>
+    <p class="lede" data-i18n="hero_lede">Describe la tarea docente que quieres resolver. ForjaIA te devuelve una app HTML de un solo fichero, funcionando y lista para subir a GitHub Pages. Sin programar.</p>
+    <div class="rail">
+      <div class="rail-step" data-on="1" id="rail1"><span class="rail-num">1</span><span><span class="rail-t" data-i18n="r1t">Describe</span><span class="rail-d" data-i18n="r1d">Qué hace tu app y para quién</span></span></div>
+      <div class="rail-step" id="rail2"><span class="rail-num">2</span><span><span class="rail-t" data-i18n="r2t">Ajusta</span><span class="rail-d" data-i18n="r2d">Revisa el encargo y los campos</span></span></div>
+      <div class="rail-step" id="rail3"><span class="rail-num">3</span><span><span class="rail-t" data-i18n="r3t">Publica</span><span class="rail-d" data-i18n="r3d">Descarga, sube y cita</span></span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- CLAVE -->
+  <section class="panel">
+    <div class="panel-head"><h2 data-i18n="k_h">Tu clave de OpenAI</h2><span class="tag" data-i18n="k_tag">se queda en este navegador</span></div>
+    <div class="panel-body">
+      <div class="aviso" data-i18n="k_aviso">
+        La recarga mínima en OpenAI son 5 $, pero el consumo real de este curso son <strong>céntimos</strong>: con <span class="mono">gpt-4o-mini</span> una app generada cuesta menos de 0,01 €. Pon un límite de gasto en tu cuenta antes de empezar.
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="apikey" data-i18n="k_lab">Clave de API</label>
+          <input type="password" id="apikey" placeholder="sk-..." autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="modelo" data-i18n="k_lab2">Modelo que forja la app</label>
+          <select id="modelo">
+            <option value="gpt-4o-mini" selected data-i18n="k_m1">gpt-4o-mini — el más barato</option>
+            <option value="gpt-4o" data-i18n="k_m2">gpt-4o — más fino, más caro</option>
+            <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-ghost" id="btnGuardarKey" data-i18n="k_save">Guardar clave</button>
+        <button class="btn-ghost" id="btnBorrarKey" data-i18n="k_wipe">Borrar del navegador</button>
+        <span class="status" id="keyStatus"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PASO 1 -->
+  <section class="panel">
+    <div class="panel-head"><h2 data-i18n="p1_h">1 · Describe tu app</h2><span class="tag" data-i18n="p1_tag">en tus palabras</span></div>
+    <div class="panel-body">
+      <p class="hint" data-i18n="p1_hint">Cuenta qué quieres que haga, en qué asignatura y con qué estudiantes. Cuanto más concreto, mejor sale el encargo del agente.</p>
+      <div class="field">
+        <label for="brief" data-i18n="p1_l1">Qué quieres que haga tu app</label>
+        <textarea id="brief" data-i18n-ph="p1_ph1" placeholder="Ejemplo: una app que genere casos prácticos de contabilidad de costes para 2.º de ADE, con datos de una empresa ficticia, tres preguntas de análisis y la solución razonada aparte."></textarea>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="disciplina" data-i18n="p1_l2">Asignatura o área</label>
+          <input type="text" id="disciplina" data-i18n-ph="p1_ph2" placeholder="Contabilidad de costes · Enfermería · Derecho procesal">
+        </div>
+        <div class="field">
+          <label for="publico" data-i18n="p1_l3">A quién va dirigida</label>
+          <input type="text" id="publico" data-i18n-ph="p1_ph3" placeholder="Estudiantes de 2.º de grado">
+        </div>
+      </div>
+      <p class="hint" style="margin:2px 0 0" data-i18n="p1_ex">O parte de un ejemplo:</p>
+      <div class="chips" id="chips"></div>
+      <div class="actions" style="margin-top:16px">
+        <button class="btn-primary" id="btnForjar" data-i18n="p1_forge">Forjar especificación</button>
+        <button class="btn-ghost" id="btnBlanco" data-i18n="p1_blank">Empezar en blanco</button>
+        <span class="status" id="forjaStatus"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PASO 2 -->
+  <section class="panel hidden" id="paso2">
+    <div class="panel-head"><h2 data-i18n="p2_h">2 · Ajusta el encargo</h2><span class="tag" data-i18n="p2_tag">todo es editable</span></div>
+    <div class="panel-body">
+      <p class="hint" data-i18n="p2_hint">Esto es el cerebro de tu app. Revisa sobre todo el <strong>encargo al agente</strong>: ahí es donde vive tu criterio docente.</p>
+      <div class="grid2">
+        <div class="field"><label for="sTitulo" data-i18n="p2_l1">Nombre de la app</label><input type="text" id="sTitulo"></div>
+        <div class="field"><label for="sSub" data-i18n="p2_l2">Descripción corta</label><input type="text" id="sSub"></div>
+      </div>
+      <div class="field">
+        <label for="sSystem" data-i18n="p2_l3">Encargo al agente (system prompt)</label>
+        <textarea id="sSystem" style="min-height:150px"></textarea>
+      </div>
+      <div class="field">
+        <label for="sSalida" data-i18n="p2_l4">Cómo debe ser la respuesta</label>
+        <textarea id="sSalida" style="min-height:80px" data-i18n-ph="p2_ph4" placeholder="Estructura, extensión, tono, qué no debe hacer nunca."></textarea>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="sBoton" data-i18n="p2_l5">Texto del botón</label><input type="text" id="sBoton"></div>
+        <div class="field">
+          <label for="sModelo" data-i18n="p2_l6">Modelo que usará tu app</label>
+          <select id="sModelo">
+            <option value="gpt-4o-mini" selected>gpt-4o-mini</option>
+            <option value="gpt-4o">gpt-4o</option>
+            <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+          </select>
+        </div>
+      </div>
+
+      <h3 style="font-family:var(--display);font-size:16px;margin:22px 0 4px" data-i18n="p2_h3a">Campos que rellenará quien la use</h3>
+      <p class="hint" data-i18n="p2_hint2">Cada campo es una pregunta que tu app hace antes de generar.</p>
+      <div id="campos"></div>
+      <button class="btn-ghost" id="btnAddCampo" data-i18n="p2_add">Añadir campo</button>
+
+      <details id="enBlock" style="margin-top:20px">
+        <summary data-i18n="p2_en_sum">Versión en inglés (opcional)</summary>
+        <div class="inner">
+          <p class="hint" data-i18n="p2_en_hint">Si la publicas bilingüe, tu app llevará un conmutador ES/EN. Traduce con IA y luego corrige a mano lo que haga falta.</p>
+          <div class="field" style="max-width:300px"><label for="altLang" data-i18n="p2_alt_sel">Idioma que estás preparando</label><select id="altLang"></select></div>
+          <label class="check" style="margin-bottom:14px"><input type="checkbox" id="bilingue"> <span data-i18n="p2_en_chk">Incluir este idioma en la app publicada</span></label>
+          <div class="actions" style="margin-bottom:16px">
+            <button class="btn-ghost" id="btnTraducir" data-i18n="p2_en_btn">Traducir con IA</button>
+            <span class="status" id="trStatus"></span>
+          </div>
+          <div class="grid2">
+            <div class="field"><label for="eTitulo" data-i18n="p2_en_l1">Nombre</label><input type="text" id="eTitulo"></div>
+            <div class="field"><label for="eSub" data-i18n="p2_en_l2">Descripción corta</label><input type="text" id="eSub"></div>
+          </div>
+          <div class="field"><label for="eBoton" data-i18n="p2_en_l3">Texto del botón</label><input type="text" id="eBoton"></div>
+          <div id="camposEn"></div>
+        </div>
+      </details>
+
+      <h3 style="font-family:var(--display);font-size:16px;margin:26px 0 4px" data-i18n="p2_h3b">Autoría</h3>
+      <p class="hint" data-i18n="p2_hint3">Se usa en el pie de la app y en el fichero de cita.</p>
+      <div class="grid2">
+        <div class="field"><label for="mAutor" data-i18n="p2_l7">Autor o autora</label><input type="text" id="mAutor" placeholder="Apellidos, Nombre"></div>
+        <div class="field"><label for="mInst" data-i18n="p2_l8">Universidad</label><input type="text" id="mInst" placeholder="Universidad ..."></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="mPais" data-i18n="p2_l9">País</label><input type="text" id="mPais" placeholder="España"></div>
+        <div class="field"><label for="mOrcid" data-i18n="p2_l10">ORCID (opcional)</label><input type="text" id="mOrcid" placeholder="0000-0000-0000-0000"></div>
+      </div>
+
+      <div class="actions" style="margin-top:18px">
+        <button class="btn-primary" id="btnGenerar" data-i18n="p2_gen">Generar mi app</button>
+        <span class="status" id="genStatus"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PASO 3 -->
+  <section class="panel hidden" id="paso3">
+    <div class="panel-head"><h2 data-i18n="p3_h">3 · Tu app</h2><span class="tag" data-i18n="p3_tag">un fichero, cero dependencias</span></div>
+    <div class="panel-body">
+      <div class="preview-wrap">
+        <div class="preview-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="preview-url" id="pvUrl">tuusuario.github.io/tu-app/</span>
+        </div>
+        <iframe id="pv" title="Previsualización de tu app" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe>
+      </div>
+
+      <p class="hint" style="margin:12px 0 0" data-i18n="p3_note">En esta previsualización tendrás que volver a escribir la clave: el navegador aísla la ventana de prueba. El fichero que descargues sí la recuerda.</p>
+      <div class="actions" style="margin-top:14px">
+        <button class="btn-primary" id="btnDescargar" data-i18n="p3_dl">Descargar index.html</button>
+        <button class="btn-ghost" id="btnCff" data-i18n="p3_cff">Descargar CITATION.cff</button>
+        <button class="btn-ghost" id="btnFicha" data-i18n="p3_ficha">Copiar ficha del catálogo</button>
+        <span class="status" id="dlStatus"></span>
+      </div>
+
+      <details>
+        <summary data-i18n="p3_sum1">Cómo publicarla en GitHub Pages en 4 pasos</summary>
+        <div class="inner">
+          <ol style="font-size:14px;line-height:1.7;padding-left:20px;margin:0" data-i18n="p3_steps">
+            <li>Crea un repositorio nuevo y público en GitHub. El nombre será parte de la URL.</li>
+            <li>Sube el fichero <span class="mono">index.html</span> que acabas de descargar.</li>
+            <li>Entra en <strong>Settings → Pages</strong>, en Source elige <em>Deploy from a branch</em>, rama <span class="mono">main</span> y carpeta <span class="mono">/ (root)</span>.</li>
+            <li>Espera un minuto: tu app está en <span class="mono">tuusuario.github.io/nombre-del-repo/</span>. Esa URL es tu entrega.</li>
+          </ol>
+        </div>
+      </details>
+
+      <details>
+        <summary data-i18n="p3_sum2">Ver el código</summary>
+        <div class="inner"><pre class="code" id="codigo"></pre></div>
+      </details>
+    </div>
+  </section>
+
+  <footer>
+    <hr>
+    <p data-i18n="foot">ForjaIA · Herramientas IA para la academia · Universidad Miguel Hernández de Elche. Tu clave de API se guarda solo en tu navegador y nunca se envía a terceros. Ni ForjaIA ni las apps que genera deben recibir datos personales de estudiantes sin anonimizar.</p>
+  </footer>
+</main>
+
+<!-- ══════ PLANTILLA DE LA APP GENERADA ══════ -->
+<script type="text/template" id="appTemplate">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITULO__</title>
+<meta name="description" content="__SUBTITULO__">
+<style>
+:root{--t:#12233A;--a:#2F5175;--ac:#8199B0;--p:#F4F7FA;--b:#E4572E;--l:#DAE2EA;--ok:#0E7C6B}
+*{box-sizing:border-box}
+body{margin:0;background:var(--p);color:var(--t);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
+header{background:var(--t);color:#EAF1F7;padding:26px 20px}
+.in{max-width:840px;margin:0 auto;position:relative}
+header h1{margin:0 0 6px;font-size:clamp(24px,4.6vw,34px);letter-spacing:-.02em}
+header p{margin:0;color:#A9C0D4;font-size:15px}
+.lang{position:absolute;top:0;right:0;display:flex;gap:4px}
+.lang button{background:transparent;border:1px solid #3E5C7D;color:#A9C0D4;font-size:12px;font-weight:600;padding:4px 9px;border-radius:5px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--b);border-color:var(--b);color:#fff}
+main{max-width:840px;margin:0 auto;padding:22px 20px 70px}
+.card{background:#fff;border:1px solid var(--l);border-radius:10px;padding:20px;margin-bottom:18px}
+label{display:block;font-size:13px;font-weight:600;color:var(--a);margin:0 0 5px}
+input,textarea,select{width:100%;padding:10px 12px;border:1px solid var(--l);border-radius:7px;font-size:15px;font-family:inherit;color:var(--t);background:#fff}
+textarea{min-height:92px;resize:vertical}
+.f{margin-bottom:14px}
+button{font-family:inherit;font-weight:600;font-size:15px;border-radius:7px;border:1px solid transparent;cursor:pointer}
+.go{background:var(--b);color:#fff;padding:12px 22px}
+.go:hover{background:#C9441F}
+.go:disabled{background:#C8D3DD;cursor:not-allowed}
+.gh{background:#fff;border-color:var(--l);color:var(--a);padding:9px 15px;font-size:14px}
+.gh:hover{border-color:var(--ac)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.msg{font-size:13.5px;color:#5D7691;margin-left:2px}
+.msg.err{color:var(--b);font-weight:600}
+.msg.ok{color:var(--ok);font-weight:600}
+.out{background:#fff;border:1px solid var(--l);border-left:3px solid var(--b);border-radius:10px;padding:22px;white-space:pre-wrap;font-size:15.5px;line-height:1.7}
+.out h2{font-size:19px;margin:18px 0 8px}
+.out h3{font-size:16px;margin:16px 0 6px}
+.out ul,.out ol{padding-left:22px}
+.out strong{font-weight:700}
+details{border:1px solid var(--l);border-radius:8px;background:#fff;margin-bottom:18px}
+summary{cursor:pointer;padding:12px 16px;font-weight:600;font-size:14px;color:var(--a)}
+.inner{padding:0 16px 16px}
+.nota{background:#FBE7DF;border:1px solid #F0C4B2;color:#8A3617;font-size:13px;padding:11px 14px;border-radius:8px;margin-bottom:16px}
+footer{max-width:840px;margin:0 auto;padding:0 20px 50px;font-size:12.5px;color:#6E8299;border-top:1px solid var(--l);padding-top:16px}
+:focus-visible{outline:3px solid var(--b);outline-offset:2px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div class="lang hide" id="lang"></div>
+  <h1 id="h1">__TITULO__</h1><p id="sub">__SUBTITULO__</p>
+</div></header>
+<main>
+  <details id="cfg">
+    <summary id="cfgSum"></summary>
+    <div class="inner">
+      <p class="nota" id="cfgNota"></p>
+      <div class="f"><label for="k" id="kLab"></label><input type="password" id="k" placeholder="sk-..." autocomplete="off"></div>
+      <div class="row"><button class="gh" id="save"></button><button class="gh" id="wipe"></button><span class="msg" id="kmsg"></span></div>
+    </div>
+  </details>
+
+  <div class="card" id="form"></div>
+
+  <div class="row" style="margin-bottom:18px">
+    <button class="go" id="run"></button>
+    <button class="gh hide" id="copy"></button>
+    <button class="gh hide" id="dl"></button>
+    <span class="msg" id="msg"></span>
+  </div>
+
+  <div class="out hide" id="out"></div>
+</main>
+<footer><span id="pie">__PIE__</span> · <span id="foot"></span></footer>
+
+<script id="spec" type="application/json">__SPEC__<\/script>
+<script>
+(function(){
+  var SPEC = JSON.parse(document.getElementById('spec').textContent);
+  var KEY = 'ia_openai_key';
+  var $ = function(id){ return document.getElementById(id); };
+
+  var UI = {
+    es:{ cfg:'Configurar clave de OpenAI', nota:'Tu clave se guarda únicamente en este navegador. No introduzcas datos personales de estudiantes sin anonimizar.',
+      kLab:'Clave de API', save:'Guardar clave', wipe:'Borrar', saved:'Clave guardada.', loaded:'Clave cargada.', wiped:'Clave borrada de este navegador.',
+      needKey:'Escribe la clave antes de guardar.', noKey:'Falta la clave de API. Ábrela arriba y guárdala.', fill:'Completa: ', gen:'Generando…', ready:'Listo.',
+      copy:'Copiar', dl:'Descargar .md', copied:'Copiado al portapapeles.', quota:'Tu cuenta de OpenAI no tiene saldo. Recarga y vuelve a intentarlo.',
+      lang:'Responde íntegramente en español.',
+      foot:'Generada con ForjaIA (IAgen2027, Universidad Miguel Hernández de Elche). El resultado procede de un modelo de lenguaje: revísalo antes de usarlo con estudiantes.' },
+    en:{ cfg:'Set up your OpenAI key', nota:'Your key is stored in this browser only. Never enter identifiable student data.',
+      kLab:'API key', save:'Save key', wipe:'Delete', saved:'Key saved.', loaded:'Key loaded.', wiped:'Key deleted from this browser.',
+      needKey:'Enter the key before saving.', noKey:'No API key yet. Open the panel above and save one.', fill:'Please complete: ', gen:'Generating…', ready:'Done.',
+      copy:'Copy', dl:'Download .md', copied:'Copied to clipboard.', quota:'Your OpenAI account has no credit left. Top it up and try again.',
+      lang:'Answer entirely in English.',
+      foot:'Built with ForjaIA (IAgen2027, Universidad Miguel Hernández de Elche). The output comes from a language model: review it before using it with students.' },
+    pt:{ cfg:'Configurar chave da OpenAI', nota:'Sua chave fica somente neste navegador. Não insira dados pessoais de estudantes sem anonimizar.',
+      kLab:'Chave de API', save:'Salvar chave', wipe:'Apagar', saved:'Chave salva.', loaded:'Chave carregada.', wiped:'Chave apagada deste navegador.',
+      needKey:'Digite a chave antes de salvar.', noKey:'Falta a chave de API. Abra o painel acima e salve-a.', fill:'Complete: ', gen:'Gerando…', ready:'Pronto.',
+      copy:'Copiar', dl:'Baixar .md', copied:'Copiado para a área de transferência.', quota:'Sua conta da OpenAI está sem saldo. Recarregue e tente de novo.',
+      lang:'Responda inteiramente em português do Brasil.',
+      foot:'Gerado com ForjaIA (IAgen2027, Universidad Miguel Hernández de Elche). O resultado vem de um modelo de linguagem: revise antes de usar com estudantes.' }
+  };
+  var ETIQUETA = {es:'ES', en:'EN', pt:'PT'};
+
+  var LS = (function(){
+    try{ var t='__forja'; window.localStorage.setItem(t,'1'); window.localStorage.removeItem(t); return window.localStorage; }
+    catch(e){ var m={}; return {getItem:function(k){return m[k]||null;},setItem:function(k,v){m[k]=v;},removeItem:function(k){delete m[k];}}; }
+  })();
+
+  var base = SPEC.base || 'es';
+  var IDIOMAS = (SPEC.idiomas && SPEC.idiomas.length) ? SPEC.idiomas : [base];
+  var guardado = LS.getItem('forja_lang_' + SPEC.slug);
+  var lang = (IDIOMAS.indexOf(guardado) > -1) ? guardado : base;
+
+  /* ── Idioma ── */
+  if(IDIOMAS.length > 1){
+    var cont = $('lang');
+    cont.classList.remove('hide');
+    IDIOMAS.forEach(function(l){
+      var b = document.createElement('button');
+      b.type = 'button'; b.dataset.l = l; b.textContent = ETIQUETA[l] || l.toUpperCase();
+      b.onclick = function(){ lang = l; LS.setItem('forja_lang_' + SPEC.slug, l); pinta(); };
+      cont.appendChild(b);
+    });
+  }
+
+  function C(){ return SPEC.i18n[lang] || SPEC.i18n[base]; }
+  function T(){ return UI[lang] || UI.es; }
+
+  function pinta(){
+    var c = C(), u = T();
+    document.documentElement.lang = lang;
+    document.title = c.titulo;
+    $('h1').textContent = c.titulo;
+    $('sub').textContent = c.subtitulo;
+    $('cfgSum').textContent = u.cfg;
+    $('cfgNota').textContent = u.nota;
+    $('kLab').textContent = u.kLab;
+    $('save').textContent = u.save;
+    $('wipe').textContent = u.wipe;
+    $('run').textContent = c.boton;
+    $('copy').textContent = u.copy;
+    $('dl').textContent = u.dl;
+    $('foot').textContent = u.foot;
+    Array.prototype.forEach.call(document.querySelectorAll('#lang button'), function(b){
+      b.setAttribute('aria-pressed', b.dataset.l === lang ? 'true' : 'false');
+    });
+    pintaForm();
+  }
+
+  var valores = {};
+  function pintaForm(){
+    var c = C(), form = $('form');
+    Array.prototype.forEach.call(form.querySelectorAll('[data-ci]'), function(el){ valores[el.dataset.ci] = el.value; });
+    form.innerHTML = '';
+    SPEC.campos.forEach(function(campo, i){
+      var txt = (c.campos && c.campos[i]) ? c.campos[i] : {label: campo.id, placeholder:'', opciones: campo.opciones};
+      var w = document.createElement('div'); w.className = 'f';
+      var lab = document.createElement('label'); lab.setAttribute('for','c_'+campo.id);
+      lab.textContent = txt.label + (campo.requerido ? ' *' : '');
+      var el;
+      if(campo.tipo === 'textarea'){ el = document.createElement('textarea'); }
+      else if(campo.tipo === 'select'){
+        el = document.createElement('select');
+        var ops = (txt.opciones && txt.opciones.length) ? txt.opciones : campo.opciones;
+        ops.forEach(function(o, k){
+          var op = document.createElement('option');
+          op.value = campo.opciones[k] || o; op.textContent = o; el.appendChild(op);
+        });
+      } else { el = document.createElement('input'); el.type = (campo.tipo === 'number' ? 'number' : 'text'); }
+      el.id = 'c_' + campo.id; el.dataset.ci = campo.id;
+      if(txt.placeholder && campo.tipo !== 'select') el.placeholder = txt.placeholder;
+      if(valores[campo.id] !== undefined) el.value = valores[campo.id];
+      w.appendChild(lab); w.appendChild(el); form.appendChild(w);
+    });
+  }
+
+  /* ── Clave ── */
+  var saved = LS.getItem(KEY) || '';
+  if(saved){ $('k').value = saved; $('kmsg').textContent = T().loaded; $('kmsg').className = 'msg ok'; }
+  else { $('cfg').open = true; }
+  $('save').onclick = function(){
+    var v = $('k').value.trim();
+    if(!v){ $('kmsg').textContent = T().needKey; $('kmsg').className = 'msg err'; return; }
+    LS.setItem(KEY, v); $('kmsg').textContent = T().saved; $('kmsg').className = 'msg ok';
+  };
+  $('wipe').onclick = function(){
+    LS.removeItem(KEY); $('k').value = ''; $('kmsg').textContent = T().wiped; $('kmsg').className = 'msg';
+  };
+
+  /* ── Render mínimo de markdown ── */
+  function render(t){
+    var esc = t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    esc = esc.replace(/^### (.*)$/gm,'<h3>$1</h3>')
+             .replace(/^## (.*)$/gm,'<h2>$1</h2>')
+             .replace(/^# (.*)$/gm,'<h2>$1</h2>')
+             .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+             .replace(/^\s*[-*] (.*)$/gm,'<li>$1</li>');
+    esc = esc.replace(/(<li>[\s\S]*?<\/li>)(?!\s*<li>)/g,'<ul>$1</ul>');
+    return esc;
+  }
+
+  var ultimo = '';
+  $('run').onclick = function(){
+    var u = T(), c = C();
+    var key = LS.getItem(KEY);
+    if(!key){ $('msg').textContent = u.noKey; $('msg').className = 'msg err'; $('cfg').open = true; return; }
+    var faltan = [], datos = [];
+    SPEC.campos.forEach(function(campo, i){
+      var txt = (c.campos && c.campos[i]) ? c.campos[i].label : campo.id;
+      var v = ($('c_' + campo.id).value || '').trim();
+      if(campo.requerido && !v) faltan.push(txt);
+      if(v) datos.push(txt + ': ' + v);
+    });
+    if(faltan.length){ $('msg').textContent = u.fill + faltan.join(', ') + '.'; $('msg').className = 'msg err'; return; }
+
+    $('run').disabled = true; $('msg').textContent = u.gen; $('msg').className = 'msg';
+    $('out').classList.add('hide'); $('copy').classList.add('hide'); $('dl').classList.add('hide');
+
+    fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body: JSON.stringify({
+        model: SPEC.modelo || 'gpt-4o-mini',
+        temperature: 0.7,
+        max_tokens: 2200,
+        messages:[
+          {role:'system', content: SPEC.systemPrompt + '\n\n' + SPEC.instruccionSalida + '\n\n' + u.lang},
+          {role:'user', content: datos.join('\n')}
+        ]
+      })
+    })
+    .then(function(r){
+      if(!r.ok) return r.json().then(function(e){ throw new Error((e.error && e.error.message) || ('Error ' + r.status)); });
+      return r.json();
+    })
+    .then(function(d){
+      ultimo = d.choices[0].message.content;
+      $('out').innerHTML = render(ultimo);
+      $('out').classList.remove('hide'); $('copy').classList.remove('hide'); $('dl').classList.remove('hide');
+      $('msg').textContent = u.ready; $('msg').className = 'msg ok';
+    })
+    .catch(function(e){
+      $('msg').textContent = (e.message.indexOf('quota') > -1) ? u.quota : e.message;
+      $('msg').className = 'msg err';
+    })
+    .then(function(){ $('run').disabled = false; });
+  };
+
+  $('copy').onclick = function(){
+    navigator.clipboard.writeText(ultimo).then(function(){ $('msg').textContent = T().copied; $('msg').className = 'msg ok'; });
+  };
+  $('dl').onclick = function(){
+    var b = new Blob([ultimo], {type:'text/markdown'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = (SPEC.slug || 'resultado') + '.md';
+    a.click(); URL.revokeObjectURL(a.href);
+  };
+
+  pinta();
+})();
+<\/script>
+</body>
+</html>
+</script>
+
+<script>
+(function(){
+'use strict';
+var KEY = 'ia_openai_key';
+var LKEY = 'forjaia_lang';
+var $ = function(id){ return document.getElementById(id); };
+var spec = null;
+var lang = localStorage.getItem(LKEY) || 'es';
+
+/* ══ Diccionario ══ */
+var I18N = {
+es:{
+  doc:'ForjaIA · Crea tu app docente de un solo fichero',
+  hero_lede:'Describe la tarea docente que quieres resolver. ForjaIA te devuelve una app HTML de un solo fichero, funcionando y lista para subir a GitHub Pages. Sin programar.',
+  r1t:'Describe', r1d:'Qué hace tu app y para quién',
+  r2t:'Ajusta', r2d:'Revisa el encargo y los campos',
+  r3t:'Publica', r3d:'Descarga, sube y cita',
+  k_h:'Tu clave de OpenAI', k_tag:'se queda en este navegador',
+  k_aviso:'La recarga mínima en OpenAI son 5 $, pero el consumo real de este curso son <strong>céntimos</strong>: con <span class="mono">gpt-4o-mini</span> una app generada cuesta menos de 0,01 €. Pon un límite de gasto en tu cuenta antes de empezar.',
+  k_lab:'Clave de API', k_lab2:'Modelo que forja la app',
+  k_m1:'gpt-4o-mini — el más barato', k_m2:'gpt-4o — más fino, más caro',
+  k_save:'Guardar clave', k_wipe:'Borrar del navegador',
+  st_saved:'Clave guardada.', st_loaded:'Clave cargada desde este navegador.', st_wiped:'Clave borrada de este navegador.', st_needkey:'Escribe la clave antes de guardar.',
+  p1_h:'1 · Describe tu app', p1_tag:'en tus palabras',
+  p1_hint:'Cuenta qué quieres que haga, en qué asignatura y con qué estudiantes. Cuanto más concreto, mejor sale el encargo del agente.',
+  p1_l1:'Qué quieres que haga tu app',
+  p1_ph1:'Ejemplo: una app que genere casos prácticos de contabilidad de costes para 2.º de ADE, con datos de una empresa ficticia, tres preguntas de análisis y la solución razonada aparte.',
+  p1_l2:'Asignatura o área', p1_ph2:'Contabilidad de costes · Enfermería · Derecho procesal',
+  p1_l3:'A quién va dirigida', p1_ph3:'Estudiantes de 2.º de grado',
+  p1_ex:'O parte de un ejemplo:', p1_forge:'Forjar especificación', p1_blank:'Empezar en blanco',
+  st_nobrief:'Describe primero qué quieres que haga tu app.', st_forging:'Forjando la especificación…', st_specok:'Especificación lista. Revísala abajo.',
+  st_blank:'Plantilla en blanco cargada. Edítala a mano.',
+  st_quota:'Tu cuenta de OpenAI no tiene saldo. Recarga y reintenta.', st_badkey:'La clave no es válida. Revísala en el panel de arriba.',
+  st_nokey:'Falta la clave de API. Guárdala en el panel de arriba.',
+  p2_h:'2 · Ajusta el encargo', p2_tag:'todo es editable',
+  p2_hint:'Esto es el cerebro de tu app. Revisa sobre todo el <strong>encargo al agente</strong>: ahí es donde vive tu criterio docente.',
+  p2_l1:'Nombre de la app', p2_l2:'Descripción corta', p2_l3:'Encargo al agente (system prompt)',
+  p2_l4:'Cómo debe ser la respuesta', p2_ph4:'Estructura, extensión, tono, qué no debe hacer nunca.',
+  p2_l5:'Texto del botón', p2_l6:'Modelo que usará tu app',
+  p2_h3a:'Campos que rellenará quien la use', p2_hint2:'Cada campo es una pregunta que tu app hace antes de generar.', p2_add:'Añadir campo',
+  p2_h3b:'Autoría', p2_hint3:'Se usa en el pie de la app y en el fichero de cita.',
+  p2_l7:'Autor o autora', p2_l8:'Universidad', p2_l9:'País', p2_l10:'ORCID (opcional)', p2_gen:'Generar mi app',
+  p2_en_sum:'Otros idiomas (opcional)',
+  p2_en_hint:'Cada idioma que actives se convierte en un botón en la cabecera de tu app. Traduce con IA y luego corrige a mano lo que haga falta.',
+  p2_alt_sel:'Idioma que estás preparando',
+  p2_en_chk:'Incluir este idioma en la app publicada', p2_en_btn:'Traducir con IA',
+  p2_en_l1:'Nombre', p2_en_l2:'Descripción corta', p2_en_l3:'Texto del botón',
+  st_translating:'Traduciendo…', st_translated:'Traducción lista. Revísala y corrige lo que quieras.',
+  st_nospec:'Genera primero la especificación.', st_nosys:'El encargo al agente no puede quedar vacío.', st_genok:'App generada. Pruébala abajo antes de publicarla.',
+  st_min1:'Tu app necesita al menos un campo.',
+  c_n:'CAMPO', c_del:'Quitar', c_label:'Etiqueta', c_tipo:'Tipo', c_ops:'Opciones, separadas por comas', c_ph:'Texto de ayuda dentro del campo', c_req:'Obligatorio',
+  t_text:'Texto corto', t_textarea:'Texto largo', t_select:'Lista de opciones', t_number:'Número',
+  p3_h:'3 · Tu app', p3_tag:'un fichero, cero dependencias',
+  p3_note:'En esta previsualización tendrás que volver a escribir la clave: el navegador aísla la ventana de prueba. El fichero que descargues sí la recuerda.',
+  p3_dl:'Descargar index.html', p3_cff:'Descargar CITATION.cff', p3_ficha:'Copiar ficha del catálogo',
+  p3_sum1:'Cómo publicarla en GitHub Pages en 4 pasos',
+  p3_steps:'<li>Crea un repositorio nuevo y público en GitHub. El nombre será parte de la URL.</li><li>Sube el fichero <span class="mono">index.html</span> que acabas de descargar.</li><li>Entra en <strong>Settings → Pages</strong>, en Source elige <em>Deploy from a branch</em>, rama <span class="mono">main</span> y carpeta <span class="mono">/ (root)</span>.</li><li>Espera un minuto: tu app está en <span class="mono">tuusuario.github.io/nombre-del-repo/</span>. Esa URL es tu entrega.</li>',
+  p3_sum2:'Ver el código',
+  st_dl:'Descargado. Súbelo tal cual, sin cambiarle el nombre.', st_cff:'CITATION.cff descargado. Súbelo junto al index.html.',
+  st_ficha:'Ficha copiada. Pégala en el índice del catálogo.', st_nocopy:'No se pudo copiar. Ábrela en «Ver el código» y cópiala a mano.',
+  foot:'ForjaIA · Herramientas IA para la academia · Universidad Miguel Hernández de Elche. Tu clave de API se guarda solo en tu navegador y nunca se envía a terceros. Ni ForjaIA ni las apps que genera deben recibir datos personales de estudiantes sin anonimizar.',
+  blank_t:'Mi app docente', blank_s:'Descríbela en una frase',
+  blank_sys:'Eres docente de [asignatura] en una universidad. Tu tarea es […]. Criterios: […]. Nunca inventes referencias bibliográficas ni asignes calificaciones.',
+  blank_out:'Respuesta estructurada en secciones con títulos, máximo 600 palabras.',
+  blank_btn:'Generar', blank_c:'Tema', blank_cph:'Sobre qué', new_c:'Nuevo campo'
+},
+en:{
+  doc:'ForjaIA · Build your single-file teaching app',
+  hero_lede:'Describe the teaching task you want to solve. ForjaIA gives you back a working single-file HTML app, ready to upload to GitHub Pages. No coding.',
+  r1t:'Describe', r1d:'What your app does and for whom',
+  r2t:'Adjust', r2d:'Review the brief and the fields',
+  r3t:'Publish', r3d:'Download, upload and cite',
+  k_h:'Your OpenAI key', k_tag:'stays in this browser',
+  k_aviso:'The minimum top-up at OpenAI is $5, but this course actually costs <strong>cents</strong>: with <span class="mono">gpt-4o-mini</span> one generated app costs under €0.01. Set a spending limit on your account before you start.',
+  k_lab:'API key', k_lab2:'Model that forges the app',
+  k_m1:'gpt-4o-mini — cheapest', k_m2:'gpt-4o — sharper, pricier',
+  k_save:'Save key', k_wipe:'Delete from browser',
+  st_saved:'Key saved.', st_loaded:'Key loaded from this browser.', st_wiped:'Key deleted from this browser.', st_needkey:'Enter the key before saving.',
+  p1_h:'1 · Describe your app', p1_tag:'in your own words',
+  p1_hint:'Say what it should do, for which course and which students. The more concrete you are, the better the agent brief comes out.',
+  p1_l1:'What you want your app to do',
+  p1_ph1:'Example: an app that generates cost accounting cases for second-year business students, with data from a fictional company, three analysis questions and the reasoned solution at the end.',
+  p1_l2:'Course or field', p1_ph2:'Cost accounting · Nursing · Procedural law',
+  p1_l3:'Who it is for', p1_ph3:'Second-year undergraduates',
+  p1_ex:'Or start from an example:', p1_forge:'Forge specification', p1_blank:'Start from scratch',
+  st_nobrief:'Describe what your app should do first.', st_forging:'Forging the specification…', st_specok:'Specification ready. Review it below.',
+  st_blank:'Blank template loaded. Edit it by hand.',
+  st_quota:'Your OpenAI account has no credit left. Top it up and try again.', st_badkey:'That key is not valid. Check it in the panel above.',
+  st_nokey:'No API key yet. Save one in the panel above.',
+  p2_h:'2 · Adjust the brief', p2_tag:'everything is editable',
+  p2_hint:'This is the brain of your app. Look closely at the <strong>agent brief</strong>: that is where your teaching judgement lives.',
+  p2_l1:'App name', p2_l2:'Short description', p2_l3:'Agent brief (system prompt)',
+  p2_l4:'What the answer should look like', p2_ph4:'Structure, length, tone, what it must never do.',
+  p2_l5:'Button label', p2_l6:'Model your app will use',
+  p2_h3a:'Fields the user will fill in', p2_hint2:'Each field is a question your app asks before generating.', p2_add:'Add field',
+  p2_h3b:'Authorship', p2_hint3:'Used in the app footer and in the citation file.',
+  p2_l7:'Author', p2_l8:'University', p2_l9:'Country', p2_l10:'ORCID (optional)', p2_gen:'Build my app',
+  p2_en_sum:'Other languages (optional)',
+  p2_en_hint:'Every language you switch on becomes a button in your app header. Translate with AI, then fix whatever needs fixing.',
+  p2_alt_sel:'Language you are preparing',
+  p2_en_chk:'Include this language in the published app', p2_en_btn:'Translate with AI',
+  p2_en_l1:'Name', p2_en_l2:'Short description', p2_en_l3:'Button label',
+  st_translating:'Translating…', st_translated:'Translation ready. Review and edit as you like.',
+  st_nospec:'Generate the specification first.', st_nosys:'The agent brief cannot be empty.', st_genok:'App built. Try it below before publishing.',
+  st_min1:'Your app needs at least one field.',
+  c_n:'FIELD', c_del:'Remove', c_label:'Label', c_tipo:'Type', c_ops:'Options, comma separated', c_ph:'Helper text inside the field', c_req:'Required',
+  t_text:'Short text', t_textarea:'Long text', t_select:'Dropdown list', t_number:'Number',
+  p3_h:'3 · Your app', p3_tag:'one file, zero dependencies',
+  p3_note:'In this preview you will have to type the key again: the browser isolates the test window. The file you download does remember it.',
+  p3_dl:'Download index.html', p3_cff:'Download CITATION.cff', p3_ficha:'Copy catalogue entry',
+  p3_sum1:'How to publish it on GitHub Pages in 4 steps',
+  p3_steps:'<li>Create a new public repository on GitHub. Its name becomes part of the URL.</li><li>Upload the <span class="mono">index.html</span> file you just downloaded.</li><li>Go to <strong>Settings → Pages</strong>, under Source pick <em>Deploy from a branch</em>, branch <span class="mono">main</span>, folder <span class="mono">/ (root)</span>.</li><li>Wait a minute: your app is live at <span class="mono">yourname.github.io/repo-name/</span>. That URL is your submission.</li>',
+  p3_sum2:'View the code',
+  st_dl:'Downloaded. Upload it as is, without renaming it.', st_cff:'CITATION.cff downloaded. Upload it next to index.html.',
+  st_ficha:'Entry copied. Paste it into the catalogue index.', st_nocopy:'Could not copy. Open “View the code” and copy it by hand.',
+  foot:'ForjaIA · AI tools for academia · Universidad Miguel Hernández de Elche. Your API key is stored in your browser only and never sent to third parties. Neither ForjaIA nor the apps it builds should ever receive identifiable student data.',
+  blank_t:'My teaching app', blank_s:'Describe it in one sentence',
+  blank_sys:'You are a university lecturer in [course]. Your task is […]. Criteria: […]. Never invent references and never assign grades.',
+  blank_out:'A structured answer with section headings, 600 words maximum.',
+  blank_btn:'Generate', blank_c:'Topic', blank_cph:'What about', new_c:'New field'
+},
+pt:{
+  doc:'ForjaIA · Crie seu aplicativo docente de arquivo único',
+  hero_lede:'Descreva a tarefa docente que você quer resolver. O ForjaIA devolve um aplicativo HTML de arquivo único, funcionando e pronto para subir no GitHub Pages. Sem programar.',
+  r1t:'Descreva', r1d:'O que seu aplicativo faz e para quem',
+  r2t:'Ajuste', r2d:'Revise a instrução e os campos',
+  r3t:'Publique', r3d:'Baixe, suba e cite',
+  k_h:'Sua chave da OpenAI', k_tag:'fica neste navegador',
+  k_aviso:'A recarga mínima na OpenAI é de US$ 5, mas o consumo real deste curso é de <strong>centavos</strong>: com <span class="mono">gpt-4o-mini</span> um aplicativo gerado custa menos de R$ 0,05. Defina um limite de gasto na sua conta antes de começar.',
+  k_lab:'Chave de API', k_lab2:'Modelo que forja o aplicativo',
+  k_m1:'gpt-4o-mini — o mais barato', k_m2:'gpt-4o — mais refinado, mais caro',
+  k_save:'Salvar chave', k_wipe:'Apagar do navegador',
+  st_saved:'Chave salva.', st_loaded:'Chave carregada deste navegador.', st_wiped:'Chave apagada deste navegador.', st_needkey:'Digite a chave antes de salvar.',
+  p1_h:'1 · Descreva seu aplicativo', p1_tag:'com suas palavras',
+  p1_hint:'Conte o que ele deve fazer, em qual disciplina e com quais estudantes. Quanto mais concreto, melhor sai a instrução do agente.',
+  p1_l1:'O que você quer que seu aplicativo faça',
+  p1_ph1:'Exemplo: um aplicativo que gere casos práticos de contabilidade de custos para o 2.º ano de Administração, com dados de uma empresa fictícia, três perguntas de análise e a solução comentada no final.',
+  p1_l2:'Disciplina ou área', p1_ph2:'Contabilidade de custos · Enfermagem · Direito processual',
+  p1_l3:'Para quem é', p1_ph3:'Estudantes do 2.º ano da graduação',
+  p1_ex:'Ou parta de um exemplo:', p1_forge:'Forjar especificação', p1_blank:'Começar do zero',
+  st_nobrief:'Descreva primeiro o que seu aplicativo deve fazer.', st_forging:'Forjando a especificação…', st_specok:'Especificação pronta. Revise abaixo.',
+  st_blank:'Modelo em branco carregado. Edite manualmente.',
+  st_quota:'Sua conta da OpenAI está sem saldo. Recarregue e tente de novo.', st_badkey:'A chave não é válida. Verifique no painel acima.',
+  st_nokey:'Falta a chave de API. Salve-a no painel acima.',
+  p2_h:'2 · Ajuste a instrução', p2_tag:'tudo é editável',
+  p2_hint:'Este é o cérebro do seu aplicativo. Revise sobretudo a <strong>instrução ao agente</strong>: é ali que mora o seu critério docente.',
+  p2_l1:'Nome do aplicativo', p2_l2:'Descrição curta', p2_l3:'Instrução ao agente (system prompt)',
+  p2_l4:'Como deve ser a resposta', p2_ph4:'Estrutura, extensão, tom, o que nunca deve fazer.',
+  p2_l5:'Texto do botão', p2_l6:'Modelo que seu aplicativo vai usar',
+  p2_h3a:'Campos que o usuário vai preencher', p2_hint2:'Cada campo é uma pergunta que seu aplicativo faz antes de gerar.', p2_add:'Adicionar campo',
+  p2_h3b:'Autoria', p2_hint3:'Usado no rodapé do aplicativo e no arquivo de citação.',
+  p2_l7:'Autor ou autora', p2_l8:'Universidade', p2_l9:'País', p2_l10:'ORCID (opcional)', p2_gen:'Gerar meu aplicativo',
+  p2_en_sum:'Outros idiomas (opcional)',
+  p2_en_hint:'Cada idioma que você ativar vira um botão no cabeçalho do seu aplicativo. Traduza com IA e depois corrija o que for preciso.',
+  p2_alt_sel:'Idioma que você está preparando',
+  p2_en_chk:'Incluir este idioma no aplicativo publicado', p2_en_btn:'Traduzir com IA',
+  p2_en_l1:'Nome', p2_en_l2:'Descrição curta', p2_en_l3:'Texto do botão',
+  st_translating:'Traduzindo…', st_translated:'Tradução pronta. Revise e ajuste o que quiser.',
+  st_nospec:'Gere primeiro a especificação.', st_nosys:'A instrução ao agente não pode ficar vazia.', st_genok:'Aplicativo gerado. Teste abaixo antes de publicar.',
+  st_min1:'Seu aplicativo precisa de pelo menos um campo.',
+  c_n:'CAMPO', c_del:'Remover', c_label:'Rótulo', c_tipo:'Tipo', c_ops:'Opções, separadas por vírgula', c_ph:'Texto de ajuda dentro do campo', c_req:'Obrigatório',
+  t_text:'Texto curto', t_textarea:'Texto longo', t_select:'Lista de opções', t_number:'Número',
+  p3_h:'3 · Seu aplicativo', p3_tag:'um arquivo, zero dependências',
+  p3_note:'Nesta prévia você terá de digitar a chave de novo: o navegador isola a janela de teste. O arquivo que você baixar guarda a chave.',
+  p3_dl:'Baixar index.html', p3_cff:'Baixar CITATION.cff', p3_ficha:'Copiar ficha do catálogo',
+  p3_sum1:'Como publicar no GitHub Pages em 4 passos',
+  p3_steps:'<li>Crie um repositório novo e público no GitHub. O nome fará parte da URL.</li><li>Suba o arquivo <span class="mono">index.html</span> que você acabou de baixar.</li><li>Vá em <strong>Settings → Pages</strong>, em Source escolha <em>Deploy from a branch</em>, branch <span class="mono">main</span> e pasta <span class="mono">/ (root)</span>.</li><li>Espere um minuto: seu aplicativo está em <span class="mono">seuusuario.github.io/nome-do-repo/</span>. Essa URL é a sua entrega.</li>',
+  p3_sum2:'Ver o código',
+  st_dl:'Baixado. Suba assim mesmo, sem renomear.', st_cff:'CITATION.cff baixado. Suba junto com o index.html.',
+  st_ficha:'Ficha copiada. Cole no índice do catálogo.', st_nocopy:'Não foi possível copiar. Abra «Ver o código» e copie manualmente.',
+  foot:'ForjaIA · Ferramentas de IA para a academia · Universidad Miguel Hernández de Elche. Sua chave de API fica somente no seu navegador e nunca é enviada a terceiros. Nem o ForjaIA nem os aplicativos que ele gera devem receber dados pessoais de estudantes sem anonimizar.',
+  blank_t:'Meu aplicativo docente', blank_s:'Descreva em uma frase',
+  blank_sys:'Você é docente de [disciplina] em uma universidade. Sua tarefa é […]. Critérios: […]. Nunca invente referências bibliográficas nem atribua notas.',
+  blank_out:'Resposta estruturada em seções com títulos, máximo de 600 palavras.',
+  blank_btn:'Gerar', blank_c:'Tema', blank_cph:'Sobre o quê', new_c:'Novo campo'
+}};
+function t(k){ return (I18N[lang] && I18N[lang][k]) || I18N.es[k] || k; }
+
+/* ══ Cambio de idioma ══ */
+function aplicaIdioma(){
+  document.documentElement.lang = lang;
+  document.title = t('doc');
+  Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function(el){
+    var v = I18N[lang][el.dataset.i18n];
+    if(v !== undefined) el.innerHTML = v;
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-ph]'), function(el){
+    var v = I18N[lang][el.dataset.i18nPh];
+    if(v !== undefined) el.placeholder = v;
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.lang-b'), function(b){
+    b.setAttribute('aria-pressed', b.dataset.lang === lang ? 'true' : 'false');
+  });
+  pintaChips();
+  if(spec){ pintaSelectorAlt(); pintaCampos(); pintaCamposAlt(); }
+}
+Array.prototype.forEach.call(document.querySelectorAll('.lang-b'), function(b){
+  b.onclick = function(){ lang = b.dataset.lang; localStorage.setItem(LKEY, lang); aplicaIdioma(); };
+});
+
+/* ══ Clave ══ */
+function setKey(k, kind){ var e = $('keyStatus'); e.textContent = t(k); e.dataset.kind = kind || ''; }
+var guardada = localStorage.getItem(KEY) || '';
+if(guardada){ $('apikey').value = guardada; }
+$('btnGuardarKey').onclick = function(){
+  var v = $('apikey').value.trim();
+  if(!v){ setKey('st_needkey','err'); return; }
+  localStorage.setItem(KEY, v); setKey('st_saved','ok');
+};
+$('btnBorrarKey').onclick = function(){
+  localStorage.removeItem(KEY); $('apikey').value = ''; setKey('st_wiped','');
+};
+
+/* ══ Ejemplos ══ */
+var EJEMPLOS = [
+  {es:['Casos prácticos','Una app que genere casos prácticos con datos realistas, tres preguntas de análisis y la solución razonada al final.','Estudiantes de grado'],
+   en:['Practice cases','An app that generates practice cases with realistic data, three analysis questions and the reasoned solution at the end.','Undergraduates'],
+   pt:['Casos práticos','Um aplicativo que gere casos práticos com dados realistas, três perguntas de análise e a solução comentada no final.','Estudantes de graduação']},
+  {es:['Rúbrica de evaluación','Una app que construya una rúbrica analítica de 4 niveles a partir de los resultados de aprendizaje de una actividad, con descriptores observables.','Profesorado'],
+   en:['Assessment rubric','An app that builds a four-level analytic rubric from the learning outcomes of an activity, with observable descriptors.','Faculty'],
+   pt:['Rubrica de avaliação','Um aplicativo que construa uma rubrica analítica de 4 níveis a partir dos resultados de aprendizagem de uma atividade, com descritores observáveis.','Docentes']},
+  {es:['Feedback a un trabajo','Una app que dé retroalimentación formativa a un texto de estudiante: qué está bien, qué mejorar y dos preguntas para que siga pensando. Nunca pone nota.','Estudiantes de grado'],
+   en:['Feedback on an assignment','An app that gives formative feedback on a student text: what works, what to improve and two questions to keep them thinking. It never grades.','Undergraduates'],
+   pt:['Devolutiva de um trabalho','Um aplicativo que dê devolutiva formativa a um texto do estudante: o que está bom, o que melhorar e duas perguntas para continuar pensando. Nunca atribui nota.','Estudantes de graduação']},
+  {es:['Preguntas de examen','Una app que genere preguntas de opción múltiple con distractores plausibles y justificación de la respuesta correcta, indicando el nivel de la taxonomía.','Profesorado'],
+   en:['Exam questions','An app that generates multiple-choice questions with plausible distractors and a justification of the correct answer, stating the taxonomy level.','Faculty'],
+   pt:['Questões de prova','Um aplicativo que gere questões de múltipla escolha com distratores plausíveis e justificativa da resposta correta, indicando o nível da taxonomia.','Docentes']},
+  {es:['Simulación de rol','Una app que simule un interlocutor con el que el estudiante practica una conversación profesional y recibe una devolución al terminar.','Estudiantes de máster'],
+   en:['Role-play simulation','An app that plays a counterpart so the student practises a professional conversation and gets feedback at the end.','Postgraduates'],
+   pt:['Simulação de papéis','Um aplicativo que simule um interlocutor para o estudante praticar uma conversa profissional e receber devolutiva ao final.','Estudantes de pós-graduação']},
+  {es:['Guion de clase invertida','Una app que prepare el guion de una sesión de aula invertida: trabajo previo, actividad en clase, cierre y evaluación rápida.','Profesorado'],
+   en:['Flipped classroom plan','An app that drafts a flipped classroom session: prior work, in-class activity, wrap-up and a quick check.','Faculty'],
+   pt:['Roteiro de sala invertida','Um aplicativo que prepare o roteiro de uma aula invertida: trabalho prévio, atividade em sala, fechamento e avaliação rápida.','Docentes']}
+];
+function pintaChips(){
+  var c = $('chips'); c.innerHTML = '';
+  EJEMPLOS.forEach(function(e){
+    var d = e[lang] || e.es;
+    var b = document.createElement('button');
+    b.className = 'chip'; b.type = 'button'; b.textContent = d[0];
+    b.onclick = function(){ $('brief').value = d[1]; $('publico').value = d[2]; $('brief').focus(); };
+    c.appendChild(b);
+  });
+}
+
+/* ══ Modelo ══ */
+function llama(mensajes, maxTok){
+  var key = localStorage.getItem(KEY) || $('apikey').value.trim();
+  if(!key) return Promise.reject(new Error('__NOKEY__'));
+  return fetch('https://api.openai.com/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+    body: JSON.stringify({
+      model: $('modelo').value, temperature: 0.6, max_tokens: maxTok || 1600,
+      response_format: {type:'json_object'}, messages: mensajes
+    })
+  }).then(function(r){
+    if(!r.ok) return r.json().then(function(e){ throw new Error((e.error && e.error.message) || ('Error ' + r.status)); });
+    return r.json();
+  }).then(function(d){ return JSON.parse(d.choices[0].message.content); });
+}
+function errorLegible(e){
+  var m = e.message || '';
+  if(m === '__NOKEY__') return t('st_nokey');
+  if(m.indexOf('quota') > -1) return t('st_quota');
+  if(m.indexOf('Incorrect API key') > -1 || m.indexOf('invalid_api_key') > -1) return t('st_badkey');
+  return m || 'Error';
+}
+var NOMBRE_IDIOMA = {es:'español', en:'inglés', pt:'portugués de Brasil (variante brasileña, no de Portugal)'};
+var ETIQUETA_IDIOMA = {es:'Español', en:'English', pt:'Português'};
+function nombreIdioma(l){ return NOMBRE_IDIOMA[l] || l; }
+
+function pideSpec(brief, disciplina, publico){
+  var sys = 'Eres diseñador de herramientas educativas para profesorado universitario iberoamericano. '
+    + 'A partir de la descripción del docente, defines la especificación de una app sencilla. '
+    + 'Devuelve EXCLUSIVAMENTE un objeto JSON válido, sin markdown, con esta forma exacta:\n'
+    + '{"slug":"kebab-case-corto","titulo":"","subtitulo":"una frase","systemPrompt":"encargo detallado al agente, en segunda persona, con su rol docente, criterios de calidad y límites explícitos (por ejemplo: no inventar referencias, no poner calificaciones)","instruccionSalida":"estructura, extensión y tono de la respuesta","botonLabel":"verbo de acción corto","campos":[{"id":"minuscula_sin_espacios","label":"","tipo":"text|textarea|select|number","placeholder":"","opciones":[],"requerido":true}]}\n'
+    + 'Entre 2 y 5 campos. Usa "select" con opciones cuando la elección sea cerrada (nivel, idioma, extensión). '
+    + 'El systemPrompt debe ser específico de la disciplina indicada, no genérico. '
+    + 'Escribe todos los textos en ' + nombreIdioma(lang) + '.';
+  var user = 'Descripción: ' + brief + '\nAsignatura o área: ' + (disciplina || 'sin especificar')
+    + '\nDestinatarios: ' + (publico || 'estudiantes universitarios');
+  return llama([{role:'system',content:sys},{role:'user',content:user}], 1600);
+}
+
+/* ══ Normalización ══ */
+function slugify(s){
+  return (s||'mi-app').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40) || 'mi-app';
+}
+function normaliza(s){
+  s = s || {};
+  s.titulo = s.titulo || t('blank_t');
+  s.slug = slugify(s.slug || s.titulo);
+  s.subtitulo = s.subtitulo || '';
+  s.systemPrompt = s.systemPrompt || '';
+  s.instruccionSalida = s.instruccionSalida || t('blank_out');
+  s.botonLabel = s.botonLabel || t('blank_btn');
+  s.modelo = s.modelo || 'gpt-4o-mini';
+  if(!Array.isArray(s.campos) || !s.campos.length){
+    s.campos = [{id:'tema', label:t('blank_c'), tipo:'text', placeholder:t('blank_cph'), opciones:[], requerido:true}];
+  }
+  s.campos = s.campos.map(function(c,i){
+    return {
+      id: (c.id || ('campo'+(i+1))).toLowerCase().replace(/[^a-z0-9_]/g,'_'),
+      label: c.label || ('Campo '+(i+1)),
+      tipo: ['text','textarea','select','number'].indexOf(c.tipo) > -1 ? c.tipo : 'text',
+      placeholder: c.placeholder || '',
+      opciones: Array.isArray(c.opciones) ? c.opciones : [],
+      requerido: c.requerido !== false
+    };
+  });
+  s.base = lang;
+  s.otros = ['es','en','pt'].filter(function(l){ return l !== s.base; });
+  s.trad = s.trad || {};
+  s.otros.forEach(function(l){
+    if(!s.trad[l]) s.trad[l] = {titulo:'', subtitulo:'', botonLabel:'', campos:[], incluir:false};
+  });
+  s.altSel = s.otros[0];
+  return s;
+}
+
+/* ══ Pintado ══ */
+function marcaRail(n){ [1,2,3].forEach(function(i){ $('rail'+i).dataset.on = (i <= n) ? '1' : ''; }); }
+function estado(id, k, kind){ var e = $(id); e.textContent = (k.indexOf(' ') > -1 ? k : t(k)); e.dataset.kind = kind || ''; }
+
+function pintaSpec(s){
+  spec = s;
+  $('sTitulo').value = s.titulo; $('sSub').value = s.subtitulo;
+  $('sSystem').value = s.systemPrompt; $('sSalida').value = s.instruccionSalida;
+  $('sBoton').value = s.botonLabel; $('sModelo').value = s.modelo;
+  pintaSelectorAlt(); cargaAlt();
+  pintaCampos(); pintaCamposAlt();
+  $('paso2').classList.remove('hidden');
+  marcaRail(2);
+  if($('paso2').scrollIntoView) $('paso2').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function opt(v, k, sel){ return '<option value="'+v+'"'+(sel===v?' selected':'')+'>'+t(k)+'</option>'; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function pintaCampos(){
+  var cont = $('campos'); cont.innerHTML = '';
+  spec.campos.forEach(function(c, i){
+    var d = document.createElement('div'); d.className = 'campo';
+    d.innerHTML =
+      '<div class="campo-top"><span class="n">' + t('c_n') + ' ' + (i+1) + '</span>'
+      + '<button class="btn-mini" data-del="' + i + '">' + t('c_del') + '</button></div>'
+      + '<div class="grid2">'
+      + '<div class="field"><label>' + t('c_label') + '</label><input type="text" data-f="label" data-i="' + i + '" value="' + esc(c.label) + '"></div>'
+      + '<div class="field"><label>' + t('c_tipo') + '</label><select data-f="tipo" data-i="' + i + '">'
+        + opt('text','t_text',c.tipo) + opt('textarea','t_textarea',c.tipo)
+        + opt('select','t_select',c.tipo) + opt('number','t_number',c.tipo)
+      + '</select></div></div>'
+      + '<div class="field"><label>' + (c.tipo === 'select' ? t('c_ops') : t('c_ph')) + '</label>'
+      + '<input type="text" data-f="' + (c.tipo === 'select' ? 'opciones' : 'placeholder') + '" data-i="' + i + '" value="'
+      + esc(c.tipo === 'select' ? c.opciones.join(', ') : c.placeholder) + '"></div>'
+      + '<label class="check"><input type="checkbox" data-f="requerido" data-i="' + i + '"' + (c.requerido ? ' checked' : '') + '> ' + t('c_req') + '</label>';
+    cont.appendChild(d);
+  });
+  cont.querySelectorAll('[data-del]').forEach(function(b){
+    b.onclick = function(){
+      if(spec.campos.length === 1){ estado('genStatus','st_min1','err'); return; }
+      var i = parseInt(b.dataset.del,10);
+      spec.campos.splice(i,1);
+      spec.otros.forEach(function(l){
+        if(spec.trad[l].campos.length > i) spec.trad[l].campos.splice(i,1);
+      });
+      pintaCampos(); pintaCamposAlt();
+    };
+  });
+  cont.querySelectorAll('[data-f]').forEach(function(el){
+    el.onchange = function(){
+      var i = parseInt(el.dataset.i,10), f = el.dataset.f, c = spec.campos[i];
+      if(f === 'requerido') c.requerido = el.checked;
+      else if(f === 'opciones') c.opciones = el.value.split(',').map(function(x){ return x.trim(); }).filter(Boolean);
+      else if(f === 'tipo'){ c.tipo = el.value; pintaCampos(); return; }
+      else c[f] = el.value;
+    };
+  });
+}
+
+function pintaSelectorAlt(){
+  var sel = $('altLang'); if(!sel || !spec) return;
+  sel.innerHTML = '';
+  spec.otros.forEach(function(l){
+    var o = document.createElement('option');
+    o.value = l; o.textContent = ETIQUETA_IDIOMA[l];
+    if(l === spec.altSel) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.onchange = function(){ guardaAlt(); spec.altSel = sel.value; cargaAlt(); pintaCamposAlt(); };
+}
+function guardaAlt(){
+  if(!spec || !spec.altSel) return;
+  var tr = spec.trad[spec.altSel];
+  tr.titulo = $('eTitulo').value.trim();
+  tr.subtitulo = $('eSub').value.trim();
+  tr.botonLabel = $('eBoton').value.trim();
+  tr.incluir = $('bilingue').checked;
+}
+function cargaAlt(){
+  if(!spec || !spec.altSel) return;
+  var tr = spec.trad[spec.altSel];
+  $('eTitulo').value = tr.titulo; $('eSub').value = tr.subtitulo; $('eBoton').value = tr.botonLabel;
+  $('bilingue').checked = !!tr.incluir;
+}
+function pintaCamposAlt(){
+  var cont = $('camposEn'); if(!cont) return;
+  cont.innerHTML = '';
+  spec.campos.forEach(function(c, i){
+    var tr = spec.trad[spec.altSel].campos[i] || {label:'', placeholder:'', opciones:[]};
+    var d = document.createElement('div'); d.className = 'campo';
+    d.innerHTML = '<div class="campo-top"><span class="n">' + t('c_n') + ' ' + (i+1) + ' · ' + esc(c.label) + '</span></div>'
+      + '<div class="grid2">'
+      + '<div class="field"><label>' + t('c_label') + '</label><input type="text" data-t="label" data-i="' + i + '" value="' + esc(tr.label) + '"></div>'
+      + '<div class="field"><label>' + (c.tipo === 'select' ? t('c_ops') : t('c_ph')) + '</label>'
+      + '<input type="text" data-t="' + (c.tipo === 'select' ? 'opciones' : 'placeholder') + '" data-i="' + i + '" value="'
+      + esc(c.tipo === 'select' ? (tr.opciones||[]).join(', ') : tr.placeholder) + '"></div></div>';
+    cont.appendChild(d);
+  });
+  cont.querySelectorAll('[data-t]').forEach(function(el){
+    el.onchange = function(){
+      var i = parseInt(el.dataset.i,10), f = el.dataset.t;
+      var tr = spec.trad[spec.altSel];
+      if(!tr.campos[i]) tr.campos[i] = {label:'', placeholder:'', opciones:[]};
+      if(f === 'opciones') tr.campos[i].opciones = el.value.split(',').map(function(x){ return x.trim(); }).filter(Boolean);
+      else tr.campos[i][f] = el.value;
+    };
+  });
+}
+
+/* ══ Paso 1 ══ */
+$('btnForjar').onclick = function(){
+  var brief = $('brief').value.trim();
+  if(!brief){ estado('forjaStatus','st_nobrief','err'); return; }
+  $('btnForjar').disabled = true;
+  estado('forjaStatus','st_forging','');
+  pideSpec(brief, $('disciplina').value.trim(), $('publico').value.trim())
+    .then(function(s){ estado('forjaStatus','st_specok','ok'); pintaSpec(normaliza(s)); })
+    .catch(function(e){ estado('forjaStatus', errorLegible(e), 'err'); })
+    .then(function(){ $('btnForjar').disabled = false; });
+};
+$('btnBlanco').onclick = function(){
+  pintaSpec(normaliza({
+    titulo: t('blank_t'), subtitulo: t('blank_s'), systemPrompt: t('blank_sys'),
+    instruccionSalida: t('blank_out'), botonLabel: t('blank_btn'),
+    campos: [{id:'tema', label:t('blank_c'), tipo:'text', placeholder:t('blank_cph'), requerido:true}]
+  }));
+  estado('forjaStatus','st_blank','ok');
+};
+$('btnAddCampo').onclick = function(){
+  if(!spec) return;
+  spec.campos.push({id:'campo'+(spec.campos.length+1), label:t('new_c'), tipo:'text', placeholder:'', opciones:[], requerido:false});
+  pintaCampos(); pintaCamposAlt();
+};
+
+/* ══ Traducción ══ */
+$('btnTraducir').onclick = function(){
+  if(!spec){ estado('trStatus','st_nospec','err'); return; }
+  recoge();
+  var destino = nombreIdioma(spec.altSel);
+  var payload = {
+    titulo: spec.titulo, subtitulo: spec.subtitulo, botonLabel: spec.botonLabel,
+    campos: spec.campos.map(function(c){ return {label:c.label, placeholder:c.placeholder, opciones:c.opciones}; })
+  };
+  $('btnTraducir').disabled = true;
+  estado('trStatus','st_translating','');
+  llama([
+    {role:'system', content:'Traduce al ' + destino + ' los textos de interfaz que recibas. Conserva exactamente la misma estructura JSON y el mismo número de elementos en cada lista. Devuelve solo el JSON, sin explicaciones. Usa terminología académica natural, no traducción literal.'},
+    {role:'user', content: JSON.stringify(payload)}
+  ], 1200)
+  .then(function(r){
+    spec.trad[spec.altSel] = {
+      titulo: r.titulo || '', subtitulo: r.subtitulo || '', botonLabel: r.botonLabel || '',
+      campos: (r.campos || []).map(function(c){ return {label:c.label||'', placeholder:c.placeholder||'', opciones:Array.isArray(c.opciones)?c.opciones:[]}; }),
+      incluir: true
+    };
+    cargaAlt();
+    pintaCamposAlt();
+    estado('trStatus','st_translated','ok');
+  })
+  .catch(function(e){ estado('trStatus', errorLegible(e), 'err'); })
+  .then(function(){ $('btnTraducir').disabled = false; });
+};
+
+/* ══ Paso 2 → 3 ══ */
+function recoge(){
+  spec.titulo = $('sTitulo').value.trim() || t('blank_t');
+  spec.subtitulo = $('sSub').value.trim();
+  spec.systemPrompt = $('sSystem').value.trim();
+  spec.instruccionSalida = $('sSalida').value.trim();
+  spec.botonLabel = $('sBoton').value.trim() || t('blank_btn');
+  spec.modelo = $('sModelo').value;
+  spec.slug = slugify(spec.titulo);
+  spec.autor = $('mAutor').value.trim();
+  spec.institucion = $('mInst').value.trim();
+  spec.pais = $('mPais').value.trim();
+  spec.orcid = $('mOrcid').value.trim();
+  guardaAlt();
+  spec.idiomas = [spec.base].concat(spec.otros.filter(function(l){
+    return spec.trad[l].incluir && spec.trad[l].titulo;
+  }));
+  spec.bilingue = spec.idiomas.length > 1;
+  return spec;
+}
+function escAttr(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function construye(s){
+  var tpl = document.getElementById('appTemplate').textContent;
+  tpl = tpl.replace(/<\\\/script/g, '<\/script');
+  var pie = [s.autor, s.institucion, s.pais].filter(Boolean).join(' · ') || 'Autoría por completar';
+  var i18n = {};
+  i18n[s.base] = {
+    titulo: s.titulo, subtitulo: s.subtitulo, boton: s.botonLabel,
+    campos: s.campos.map(function(c){ return {label:c.label, placeholder:c.placeholder, opciones:c.opciones}; })
+  };
+  s.idiomas.filter(function(l){ return l !== s.base; }).forEach(function(l){
+    var t2 = s.trad[l];
+    i18n[l] = {
+      titulo: t2.titulo || s.titulo, subtitulo: t2.subtitulo || s.subtitulo, boton: t2.botonLabel || s.botonLabel,
+      campos: s.campos.map(function(c, i){
+        var tr = t2.campos[i] || {};
+        return {label: tr.label || c.label, placeholder: tr.placeholder || c.placeholder, opciones: (tr.opciones && tr.opciones.length) ? tr.opciones : c.opciones};
+      })
+    };
+  });
+  var payload = {
+    slug: s.slug, modelo: s.modelo, systemPrompt: s.systemPrompt, instruccionSalida: s.instruccionSalida,
+    base: s.base, idiomas: s.idiomas, bilingue: !!s.bilingue,
+    campos: s.campos.map(function(c){ return {id:c.id, tipo:c.tipo, opciones:c.opciones, requerido:c.requerido}; }),
+    i18n: i18n
+  };
+  return tpl
+    .replace(/__TITULO__/g, escAttr(s.titulo))
+    .replace(/__SUBTITULO__/g, escAttr(s.subtitulo))
+    .replace(/__PIE__/g, escAttr(pie))
+    .replace('__SPEC__', JSON.stringify(payload).replace(/</g,'\\u003c'))
+    .trim();
+}
+
+var htmlGenerado = '';
+$('btnGenerar').onclick = function(){
+  var s = recoge();
+  if(!s.systemPrompt){ estado('genStatus','st_nosys','err'); return; }
+  htmlGenerado = construye(s);
+  $('pv').srcdoc = htmlGenerado;
+  $('pvUrl').textContent = 'tuusuario.github.io/' + s.slug + '/';
+  $('codigo').textContent = htmlGenerado;
+  $('paso3').classList.remove('hidden');
+  marcaRail(3);
+  estado('genStatus','st_genok','ok');
+  if($('paso3').scrollIntoView) $('paso3').scrollIntoView({behavior:'smooth', block:'start'});
+};
+
+/* ══ Descargas ══ */
+function baja(txt, nombre, mime){
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([txt], {type: mime}));
+  a.download = nombre; a.click(); URL.revokeObjectURL(a.href);
+}
+$('btnDescargar').onclick = function(){ baja(htmlGenerado, 'index.html', 'text/html'); estado('dlStatus','st_dl','ok'); };
+$('btnCff').onclick = function(){
+  var s = spec;
+  var partes = (s.autor || '').split(',');
+  var apellidos = (partes[0] || 'Apellidos').trim();
+  var nombre = (partes[1] || 'Nombre').trim();
+  var cff = 'cff-version: 1.2.0\n'
+    + 'message: "Si utilizas este software, cítalo así. / If you use this software, please cite it as below."\n'
+    + 'title: "' + s.titulo + '"\n'
+    + 'abstract: "' + s.idiomas.map(function(l){
+        return (l === s.base) ? (s.subtitulo || s.titulo) : (s.trad[l].subtitulo || s.trad[l].titulo);
+      }).filter(Boolean).join(' / ') + '"\n'
+    + 'type: software\n'
+    + 'authors:\n'
+    + '  - family-names: "' + apellidos + '"\n'
+    + '    given-names: "' + nombre + '"\n'
+    + (s.orcid ? '    orcid: "https://orcid.org/' + s.orcid + '"\n' : '')
+    + (s.institucion ? '    affiliation: "' + s.institucion + '"\n' : '')
+    + 'version: 1.0.0\n'
+    + 'date-released: "' + new Date().toISOString().slice(0,10) + '"\n'
+    + 'license: CC-BY-4.0\n'
+    + 'keywords:\n  - generative artificial intelligence\n  - higher education\n  - IAgen2027\n'
+    + '# Añade aquí el DOI que te dé Zenodo / Add the Zenodo DOI here:\n# doi: 10.5281/zenodo.XXXXXXX\n';
+  baja(cff, 'CITATION.cff', 'text/yaml');
+  estado('dlStatus','st_cff','ok');
+};
+$('btnFicha').onclick = function(){
+  var s = spec;
+  function tex(l){
+    if(s.base === l) return {t:s.titulo, d:s.subtitulo};
+    var tr = s.trad[l];
+    return (tr && tr.titulo) ? {t:tr.titulo, d:tr.subtitulo} : {t:s.titulo, d:s.subtitulo};
+  }
+  var es = tex('es'), en = tex('en');
+  var ficha = '{ cat:"doc", icon:"ti-sparkles", title:"' + es.t + '", '
+    + 'url:"https://TUUSUARIO.github.io/' + s.slug + '/", doi:"",\n'
+    + '  es:{ sub:"' + es.d + '", desc:"' + es.d + '", tit:"' + (s.institucion||'') + '", comp:"", evid:"IAgen2027 · ' + (s.pais||'') + '" },\n'
+    + '  en:{ sub:"' + en.d + '", desc:"' + en.d + '", tit:"' + (s.institucion||'') + '", comp:"", evid:"IAgen2027 · ' + (s.pais||'') + '" } },';
+  navigator.clipboard.writeText(ficha).then(
+    function(){ estado('dlStatus','st_ficha','ok'); },
+    function(){ estado('dlStatus','st_nocopy','err'); }
+  );
+};
+
+aplicaIdioma();
+if(guardada) setKey('st_loaded','ok');
+})();
+</script>
+</body>
+</html>
