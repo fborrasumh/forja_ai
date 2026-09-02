@@ -218,6 +218,9 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 16px}
           <label for="modelo" data-i18n="k_lab2">Modelo que forja la app</label>
           <select id="modelo">
             <option value="gpt-4o-mini" selected data-i18n="k_m1">gpt-4o-mini — el más barato</option>
+            <option value="gpt-5.6-luna" data-i18n="k_m3">gpt-5.6-luna — razona, sigue siendo barato</option>
+            <option value="gpt-5.6-terra" data-i18n="k_m4">gpt-5.6-terra — equilibrado</option>
+            <option value="gpt-5.6-sol" data-i18n="k_m5">gpt-5.6-sol — el más capaz, el más caro</option>
             <option value="gpt-4o" data-i18n="k_m2">gpt-4o — más fino, más caro</option>
             <option value="gpt-4.1-mini">gpt-4.1-mini</option>
           </select>
@@ -298,6 +301,9 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 16px}
           <label for="sModelo" data-i18n="p2_l6">Modelo que usará tu app</label>
           <select id="sModelo">
             <option value="gpt-4o-mini" selected>gpt-4o-mini</option>
+            <option value="gpt-5.6-luna">gpt-5.6-luna</option>
+            <option value="gpt-5.6-terra">gpt-5.6-terra</option>
+            <option value="gpt-5.6-sol">gpt-5.6-sol</option>
             <option value="gpt-4o">gpt-4o</option>
             <option value="gpt-4.1-mini">gpt-4.1-mini</option>
           </select>
@@ -507,18 +513,21 @@ footer{max-width:840px;margin:0 auto;padding:0 20px 50px;font-size:12.5px;color:
       kLab:'Clave de API', save:'Guardar clave', wipe:'Borrar', saved:'Clave guardada.', loaded:'Clave cargada.', wiped:'Clave borrada de este navegador.',
       needKey:'Escribe la clave antes de guardar.', noKey:'Falta la clave de API. Ábrela arriba y guárdala.', fill:'Completa: ', gen:'Generando…', ready:'Listo.',
       copy:'Copiar', dl:'Descargar .md', copied:'Copiado al portapapeles.', quota:'Tu cuenta de OpenAI no tiene saldo. Recarga y vuelve a intentarlo.',
+      empty:'El modelo no devolvió texto. Vuelve a intentarlo.',
       lang:'Responde íntegramente en español.',
       foot:'Generada con ForjaIA (IAgen2027, Universidad Miguel Hernández de Elche). El resultado procede de un modelo de lenguaje: revísalo antes de usarlo con estudiantes.' },
     en:{ cfg:'Set up your OpenAI key', nota:'Your key is stored in this browser only. Never enter identifiable student data.',
       kLab:'API key', save:'Save key', wipe:'Delete', saved:'Key saved.', loaded:'Key loaded.', wiped:'Key deleted from this browser.',
       needKey:'Enter the key before saving.', noKey:'No API key yet. Open the panel above and save one.', fill:'Please complete: ', gen:'Generating…', ready:'Done.',
       copy:'Copy', dl:'Download .md', copied:'Copied to clipboard.', quota:'Your OpenAI account has no credit left. Top it up and try again.',
+      empty:'The model returned no text. Please try again.',
       lang:'Answer entirely in English.',
       foot:'Built with ForjaIA (IAgen2027, Universidad Miguel Hernández de Elche). The output comes from a language model: review it before using it with students.' },
     pt:{ cfg:'Configurar chave da OpenAI', nota:'Sua chave fica somente neste navegador. Não insira dados pessoais de estudantes sem anonimizar.',
       kLab:'Chave de API', save:'Salvar chave', wipe:'Apagar', saved:'Chave salva.', loaded:'Chave carregada.', wiped:'Chave apagada deste navegador.',
       needKey:'Digite a chave antes de salvar.', noKey:'Falta a chave de API. Abra o painel acima e salve-a.', fill:'Complete: ', gen:'Gerando…', ready:'Pronto.',
       copy:'Copiar', dl:'Baixar .md', copied:'Copiado para a área de transferência.', quota:'Sua conta da OpenAI está sem saldo. Recarregue e tente de novo.',
+      empty:'O modelo não devolveu texto. Tente novamente.',
       lang:'Responda inteiramente em português do Brasil.',
       foot:'Gerado com ForjaIA (IAgen2027, Universidad Miguel Hernández de Elche). O resultado vem de um modelo de linguagem: revise antes de usar com estudantes.' }
   };
@@ -544,6 +553,19 @@ footer{max-width:840px;margin:0 auto;padding:0 20px 50px;font-size:12.5px;color:
       b.onclick = function(){ lang = l; LS.setItem('forja_lang_' + SPEC.slug, l); pinta(); };
       cont.appendChild(b);
     });
+  }
+
+  /* gpt-5.x y o3/o4 razonan: no admiten temperature ni max_tokens */
+  function cuerpoLlamada(modelo, mensajes){
+    var b = {model: modelo, messages: mensajes};
+    if(/^(gpt-5|o[34])/.test(modelo)){
+      b.reasoning_effort = 'low';
+      b.max_completion_tokens = 8000;
+    } else {
+      b.temperature = 0.7;
+      b.max_tokens = 2200;
+    }
+    return b;
   }
 
   function C(){ return SPEC.i18n[lang] || SPEC.i18n[base]; }
@@ -642,22 +664,18 @@ footer{max-width:840px;margin:0 auto;padding:0 20px 50px;font-size:12.5px;color:
     fetch('https://api.openai.com/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-      body: JSON.stringify({
-        model: SPEC.modelo || 'gpt-4o-mini',
-        temperature: 0.7,
-        max_tokens: 2200,
-        messages:[
-          {role:'system', content: SPEC.systemPrompt + '\n\n' + SPEC.instruccionSalida + '\n\n' + u.lang},
-          {role:'user', content: datos.join('\n')}
-        ]
-      })
+      body: JSON.stringify(cuerpoLlamada(SPEC.modelo || 'gpt-4o-mini', [
+        {role:'system', content: SPEC.systemPrompt + '\n\n' + SPEC.instruccionSalida + '\n\n' + u.lang},
+        {role:'user', content: datos.join('\n')}
+      ]))
     })
     .then(function(r){
       if(!r.ok) return r.json().then(function(e){ throw new Error((e.error && e.error.message) || ('Error ' + r.status)); });
       return r.json();
     })
     .then(function(d){
-      ultimo = d.choices[0].message.content;
+      ultimo = (d.choices && d.choices[0] && d.choices[0].message.content) || '';
+      if(!ultimo.trim()) throw new Error(u.empty);
       $('out').innerHTML = render(ultimo);
       $('out').classList.remove('hide'); $('copy').classList.remove('hide'); $('dl').classList.remove('hide');
       $('msg').textContent = u.ready; $('msg').className = 'msg ok';
@@ -707,6 +725,8 @@ es:{
   k_h:'Tu clave de OpenAI', k_tag:'se queda en este navegador',
   k_aviso:'La recarga mínima en OpenAI son 5 $, pero el consumo real de este curso son <strong>céntimos</strong>: con <span class="mono">gpt-4o-mini</span> una app generada cuesta menos de 0,01 €. Pon un límite de gasto en tu cuenta antes de empezar.',
   k_lab:'Clave de API', k_lab2:'Modelo que forja la app',
+  k_m3:'gpt-5.6-luna — razona, sigue siendo barato', k_m4:'gpt-5.6-terra — equilibrado', k_m5:'gpt-5.6-sol — el más capaz, el más caro',
+  st_vacio:'El modelo agotó su presupuesto razonando y no devolvió nada. Repite, o prueba con gpt-4o-mini.',
   k_m1:'gpt-4o-mini — el más barato', k_m2:'gpt-4o — más fino, más caro',
   k_save:'Guardar clave', k_wipe:'Borrar del navegador',
   st_saved:'Clave guardada.', st_loaded:'Clave cargada desde este navegador.', st_wiped:'Clave borrada de este navegador.', st_needkey:'Escribe la clave antes de guardar.',
@@ -775,6 +795,8 @@ en:{
   k_h:'Your OpenAI key', k_tag:'stays in this browser',
   k_aviso:'The minimum top-up at OpenAI is $5, but this course actually costs <strong>cents</strong>: with <span class="mono">gpt-4o-mini</span> one generated app costs under €0.01. Set a spending limit on your account before you start.',
   k_lab:'API key', k_lab2:'Model that forges the app',
+  k_m3:'gpt-5.6-luna — reasons, still cheap', k_m4:'gpt-5.6-terra — balanced', k_m5:'gpt-5.6-sol — the most capable, the priciest',
+  st_vacio:'The model spent its whole budget reasoning and returned nothing. Try again, or switch to gpt-4o-mini.',
   k_m1:'gpt-4o-mini — cheapest', k_m2:'gpt-4o — sharper, pricier',
   k_save:'Save key', k_wipe:'Delete from browser',
   st_saved:'Key saved.', st_loaded:'Key loaded from this browser.', st_wiped:'Key deleted from this browser.', st_needkey:'Enter the key before saving.',
@@ -843,6 +865,8 @@ pt:{
   k_h:'Sua chave da OpenAI', k_tag:'fica neste navegador',
   k_aviso:'A recarga mínima na OpenAI é de US$ 5, mas o consumo real deste curso é de <strong>centavos</strong>: com <span class="mono">gpt-4o-mini</span> um aplicativo gerado custa menos de R$ 0,05. Defina um limite de gasto na sua conta antes de começar.',
   k_lab:'Chave de API', k_lab2:'Modelo que forja o aplicativo',
+  k_m3:'gpt-5.6-luna — raciocina e continua barato', k_m4:'gpt-5.6-terra — equilibrado', k_m5:'gpt-5.6-sol — o mais capaz, o mais caro',
+  st_vacio:'O modelo gastou todo o orçamento raciocinando e não devolveu nada. Tente de novo ou use o gpt-4o-mini.',
   k_m1:'gpt-4o-mini — o mais barato', k_m2:'gpt-4o — mais refinado, mais caro',
   k_save:'Salvar chave', k_wipe:'Apagar do navegador',
   st_saved:'Chave salva.', st_loaded:'Chave carregada deste navegador.', st_wiped:'Chave apagada deste navegador.', st_needkey:'Digite a chave antes de salvar.',
@@ -972,24 +996,42 @@ function pintaChips(){
 }
 
 /* ══ Modelo ══ */
+/* Los modelos de razonamiento (gpt-5.x, o3, o4) no admiten temperature ni
+   max_tokens en /chat/completions: usan max_completion_tokens, y los tokens
+   de razonamiento salen de ese mismo presupuesto. */
+function razona(m){ return /^(gpt-5|o[34])/.test(m || ''); }
+function cuerpo(modelo, mensajes, maxTok, json){
+  var b = {model: modelo, messages: mensajes};
+  if(json) b.response_format = {type:'json_object'};
+  if(razona(modelo)){
+    b.reasoning_effort = 'low';
+    b.max_completion_tokens = (maxTok || 1600) * 4;
+  } else {
+    b.temperature = 0.6;
+    b.max_tokens = maxTok || 1600;
+  }
+  return b;
+}
 function llama(mensajes, maxTok){
   var key = localStorage.getItem(KEY) || $('apikey').value.trim();
   if(!key) return Promise.reject(new Error('__NOKEY__'));
   return fetch('https://api.openai.com/v1/chat/completions',{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-    body: JSON.stringify({
-      model: $('modelo').value, temperature: 0.6, max_tokens: maxTok || 1600,
-      response_format: {type:'json_object'}, messages: mensajes
-    })
+    body: JSON.stringify(cuerpo($('modelo').value, mensajes, maxTok, true))
   }).then(function(r){
     if(!r.ok) return r.json().then(function(e){ throw new Error((e.error && e.error.message) || ('Error ' + r.status)); });
     return r.json();
-  }).then(function(d){ return JSON.parse(d.choices[0].message.content); });
+  }).then(function(d){
+    var txt = (d.choices && d.choices[0] && d.choices[0].message.content) || '';
+    if(!txt.trim()) throw new Error('__VACIO__');
+    return JSON.parse(txt);
+  });
 }
 function errorLegible(e){
   var m = e.message || '';
   if(m === '__NOKEY__') return t('st_nokey');
+  if(m === '__VACIO__') return t('st_vacio');
   if(m.indexOf('quota') > -1) return t('st_quota');
   if(m.indexOf('Incorrect API key') > -1 || m.indexOf('invalid_api_key') > -1) return t('st_badkey');
   return m || 'Error';
