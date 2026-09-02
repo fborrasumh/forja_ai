@@ -250,6 +250,21 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 16px}
           <input type="text" id="publico" data-i18n-ph="p1_ph3" placeholder="Estudiantes de 2.º de grado">
         </div>
       </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="nombreApp" data-i18n="p1_l4">Nombre de la app (opcional)</label>
+          <input type="text" id="nombreApp" data-i18n-ph="p1_ph4" placeholder="DolencIA · IsostatIA">
+        </div>
+        <div class="field">
+          <label for="camposSug" data-i18n="p1_l5">Campos que rellenará quien la use (opcional)</label>
+          <input type="text" id="camposSug" data-i18n-ph="p1_ph5" placeholder="Motivo de consulta, edad, antecedentes">
+        </div>
+      </div>
+      <div class="field">
+        <label for="limites" data-i18n="p1_l6">Cuidado con (opcional)</label>
+        <textarea id="limites" style="min-height:74px" data-i18n-ph="p1_ph6" placeholder="No dar diagnósticos ni pautas de tratamiento. No inventar referencias bibliográficas. No asignar calificaciones."></textarea>
+      </div>
+      <p class="hint" style="margin:2px 0 12px" data-i18n="p1_lim">Lo que escribas aquí se convierte en prohibiciones explícitas dentro del encargo al agente, y puedes seguir editándolas en el paso 2.</p>
       <p class="hint" style="margin:2px 0 0" data-i18n="p1_ex">O parte de un ejemplo:</p>
       <div class="chips" id="chips"></div>
       <div class="actions" style="margin-top:16px">
@@ -701,6 +716,10 @@ es:{
   p1_ph1:'Ejemplo: una app que genere casos prácticos de contabilidad de costes para 2.º de ADE, con datos de una empresa ficticia, tres preguntas de análisis y la solución razonada aparte.',
   p1_l2:'Asignatura o área', p1_ph2:'Contabilidad de costes · Enfermería · Derecho procesal',
   p1_l3:'A quién va dirigida', p1_ph3:'Estudiantes de 2.º de grado',
+  p1_l4:'Nombre de la app (opcional)', p1_ph4:'DolencIA · IsostatIA',
+  p1_l5:'Campos que rellenará quien la use (opcional)', p1_ph5:'Motivo de consulta, edad, antecedentes',
+  p1_l6:'Cuidado con (opcional)', p1_ph6:'No dar diagnósticos ni pautas de tratamiento. No inventar referencias bibliográficas. No asignar calificaciones.',
+  p1_lim:'Lo que escribas aquí se convierte en prohibiciones explícitas dentro del encargo al agente, y puedes seguir editándolas en el paso 2.',
   p1_ex:'O parte de un ejemplo:', p1_forge:'Forjar especificación', p1_blank:'Empezar en blanco',
   st_nobrief:'Describe primero qué quieres que haga tu app.', st_forging:'Forjando la especificación…', st_specok:'Especificación lista. Revísala abajo.',
   st_blank:'Plantilla en blanco cargada. Edítala a mano.',
@@ -744,6 +763,7 @@ es:{
   blank_t:'Mi app docente', blank_s:'Descríbela en una frase',
   blank_sys:'Eres docente de [asignatura] en una universidad. Tu tarea es […]. Criterios: […]. Nunca inventes referencias bibliográficas ni asignes calificaciones.',
   blank_out:'Respuesta estructurada en secciones con títulos, máximo 600 palabras.',
+  lim_head:'Límites innegociables:',
   blank_btn:'Generar', blank_c:'Tema', blank_cph:'Sobre qué', new_c:'Nuevo campo'
 },
 en:{
@@ -764,6 +784,10 @@ en:{
   p1_ph1:'Example: an app that generates cost accounting cases for second-year business students, with data from a fictional company, three analysis questions and the reasoned solution at the end.',
   p1_l2:'Course or field', p1_ph2:'Cost accounting · Nursing · Procedural law',
   p1_l3:'Who it is for', p1_ph3:'Second-year undergraduates',
+  p1_l4:'App name (optional)', p1_ph4:'DolencIA · IsostatIA',
+  p1_l5:'Fields the user will fill in (optional)', p1_ph5:'Reason for consultation, age, history',
+  p1_l6:'Watch out for (optional)', p1_ph6:'No diagnoses or treatment plans. Never invent references. Never assign grades.',
+  p1_lim:'Whatever you write here becomes an explicit set of prohibitions inside the agent brief, and you can keep editing it in step 2.',
   p1_ex:'Or start from an example:', p1_forge:'Forge specification', p1_blank:'Start from scratch',
   st_nobrief:'Describe what your app should do first.', st_forging:'Forging the specification…', st_specok:'Specification ready. Review it below.',
   st_blank:'Blank template loaded. Edit it by hand.',
@@ -807,6 +831,7 @@ en:{
   blank_t:'My teaching app', blank_s:'Describe it in one sentence',
   blank_sys:'You are a university lecturer in [course]. Your task is […]. Criteria: […]. Never invent references and never assign grades.',
   blank_out:'A structured answer with section headings, 600 words maximum.',
+  lim_head:'Non-negotiable limits:',
   blank_btn:'Generate', blank_c:'Topic', blank_cph:'What about', new_c:'New field'
 },
 pt:{
@@ -827,6 +852,10 @@ pt:{
   p1_ph1:'Exemplo: um aplicativo que gere casos práticos de contabilidade de custos para o 2.º ano de Administração, com dados de uma empresa fictícia, três perguntas de análise e a solução comentada no final.',
   p1_l2:'Disciplina ou área', p1_ph2:'Contabilidade de custos · Enfermagem · Direito processual',
   p1_l3:'Para quem é', p1_ph3:'Estudantes do 2.º ano da graduação',
+  p1_l4:'Nome do aplicativo (opcional)', p1_ph4:'DolencIA · IsostatIA',
+  p1_l5:'Campos que quem usar vai preencher (opcional)', p1_ph5:'Motivo da consulta, idade, antecedentes',
+  p1_l6:'Cuidado com (opcional)', p1_ph6:'Não dar diagnósticos nem pautas de tratamento. Não inventar referências. Não atribuir notas.',
+  p1_lim:'O que você escrever aqui vira proibições explícitas dentro do encargo ao agente, e dá para continuar editando no passo 2.',
   p1_ex:'Ou parta de um exemplo:', p1_forge:'Forjar especificação', p1_blank:'Começar do zero',
   st_nobrief:'Descreva primeiro o que seu aplicativo deve fazer.', st_forging:'Forjando a especificação…', st_specok:'Especificação pronta. Revise abaixo.',
   st_blank:'Modelo em branco carregado. Edite manualmente.',
@@ -870,6 +899,7 @@ pt:{
   blank_t:'Meu aplicativo docente', blank_s:'Descreva em uma frase',
   blank_sys:'Você é docente de [disciplina] em uma universidade. Sua tarefa é […]. Critérios: […]. Nunca invente referências bibliográficas nem atribua notas.',
   blank_out:'Resposta estruturada em seções com títulos, máximo de 600 palavras.',
+  lim_head:'Limites inegociáveis:',
   blank_btn:'Gerar', blank_c:'Tema', blank_cph:'Sobre o quê', new_c:'Novo campo'
 }};
 function t(k){ return (I18N[lang] && I18N[lang][k]) || I18N.es[k] || k; }
@@ -968,16 +998,22 @@ var NOMBRE_IDIOMA = {es:'español', en:'inglés', pt:'portugués de Brasil (vari
 var ETIQUETA_IDIOMA = {es:'Español', en:'English', pt:'Português'};
 function nombreIdioma(l){ return NOMBRE_IDIOMA[l] || l; }
 
-function pideSpec(brief, disciplina, publico){
+function pideSpec(brief, disciplina, publico, nombre, camposSug, limites){
   var sys = 'Eres diseñador de herramientas educativas para profesorado universitario iberoamericano. '
     + 'A partir de la descripción del docente, defines la especificación de una app sencilla. '
     + 'Devuelve EXCLUSIVAMENTE un objeto JSON válido, sin markdown, con esta forma exacta:\n'
     + '{"slug":"kebab-case-corto","titulo":"","subtitulo":"una frase","systemPrompt":"encargo detallado al agente, en segunda persona, con su rol docente, criterios de calidad y límites explícitos (por ejemplo: no inventar referencias, no poner calificaciones)","instruccionSalida":"estructura, extensión y tono de la respuesta","botonLabel":"verbo de acción corto","campos":[{"id":"minuscula_sin_espacios","label":"","tipo":"text|textarea|select|number","placeholder":"","opciones":[],"requerido":true}]}\n'
     + 'Entre 2 y 5 campos. Usa "select" con opciones cuando la elección sea cerrada (nivel, idioma, extensión). '
     + 'El systemPrompt debe ser específico de la disciplina indicada, no genérico. '
+    + (nombre ? 'El campo "titulo" debe ser exactamente: ' + nombre + '. No lo cambies ni lo traduzcas. ' : '')
+    + (camposSug ? 'Los campos del formulario deben ser exactamente estos, en este orden y con estas etiquetas: ' + camposSug + '. Elige para cada uno el tipo m\u00e1s adecuado y, si es "select", propon opciones razonables. ' : '')
+    + (limites ? 'El systemPrompt debe terminar con un párrafo de límites que recoja, como prohibiciones explícitas en segunda persona ("Nunca..."), todas y cada una de estas advertencias del docente: ' + limites + '. No las resumas ni las suavices. ' : '')
     + 'Escribe todos los textos en ' + nombreIdioma(lang) + '.';
   var user = 'Descripción: ' + brief + '\nAsignatura o área: ' + (disciplina || 'sin especificar')
-    + '\nDestinatarios: ' + (publico || 'estudiantes universitarios');
+    + '\nDestinatarios: ' + (publico || 'estudiantes universitarios')
+    + (nombre ? '\nNombre de la app: ' + nombre : '')
+    + (camposSug ? '\nCampos que rellenará quien la use: ' + camposSug : '')
+    + (limites ? '\nCuidado con: ' + limites : '');
   return llama([{role:'system',content:sys},{role:'user',content:user}], 1600);
 }
 
@@ -1133,16 +1169,48 @@ $('btnForjar').onclick = function(){
   if(!brief){ estado('forjaStatus','st_nobrief','err'); return; }
   $('btnForjar').disabled = true;
   estado('forjaStatus','st_forging','');
-  pideSpec(brief, $('disciplina').value.trim(), $('publico').value.trim())
-    .then(function(s){ estado('forjaStatus','st_specok','ok'); pintaSpec(normaliza(s)); })
+  var nombre = $('nombreApp').value.trim();
+  var lims = $('limites').value.trim();
+  pideSpec(brief, $('disciplina').value.trim(), $('publico').value.trim(),
+           nombre, $('camposSug').value.trim(), lims)
+    .then(function(s){
+      if(nombre) s.titulo = nombre;
+      s.systemPrompt = cierraLimites(s.systemPrompt, lims);
+      estado('forjaStatus','st_specok','ok');
+      pintaSpec(normaliza(s));
+    })
     .catch(function(e){ estado('forjaStatus', errorLegible(e), 'err'); })
     .then(function(){ $('btnForjar').disabled = false; });
 };
+function camposDesdeTexto(txt){
+  var partes = String(txt || '').split(/[,;\n\u00b7]/).map(function(x){ return x.trim(); }).filter(Boolean);
+  if(!partes.length) return [{id:'tema', label:t('blank_c'), tipo:'text', placeholder:t('blank_cph'), opciones:[], requerido:true}];
+  return partes.slice(0, 6).map(function(l, i){
+    return {id:'campo'+(i+1), label:l, tipo: l.length > 28 ? 'textarea' : 'text', placeholder:'', opciones:[], requerido: i === 0};
+  });
+}
+function cierraLimites(sys, lims){
+  sys = String(sys || '');
+  if(!lims) return sys;
+  var sueltas = lims.split(/[\n;\u00b7]|\.(?=\s|$)/)
+    .map(function(x){ return x.trim().replace(/^[-\u2022*\s]+/, ''); })
+    .filter(function(x){ return x.length > 2; });
+  var faltan = sueltas.filter(function(x){
+    var clave = x.toLowerCase().replace(/[^a-z\u00e0-\u00ff0-9 ]/g, '').split(/\s+/).filter(function(w){ return w.length > 4; }).slice(0, 2);
+    if(!clave.length) return false;
+    var low = sys.toLowerCase();
+    return clave.some(function(w){ return low.indexOf(w) === -1; });
+  });
+  if(!faltan.length) return sys;
+  return sys.replace(/\s*$/, '') + '\n\n' + t('lim_head') + ' ' + faltan.join('. ') + '.';
+}
 $('btnBlanco').onclick = function(){
+  var lims0 = $('limites').value.trim();
   pintaSpec(normaliza({
-    titulo: t('blank_t'), subtitulo: t('blank_s'), systemPrompt: t('blank_sys'),
+    titulo: $('nombreApp').value.trim() || t('blank_t'), subtitulo: t('blank_s'),
+    systemPrompt: cierraLimites(t('blank_sys'), lims0),
     instruccionSalida: t('blank_out'), botonLabel: t('blank_btn'),
-    campos: [{id:'tema', label:t('blank_c'), tipo:'text', placeholder:t('blank_cph'), requerido:true}]
+    campos: camposDesdeTexto($('camposSug').value.trim())
   }));
   estado('forjaStatus','st_blank','ok');
 };
