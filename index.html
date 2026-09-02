@@ -348,7 +348,20 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 16px}
         <button class="btn-primary" id="btnDescargar" data-i18n="p3_dl">Descargar index.html</button>
         <button class="btn-ghost" id="btnCff" data-i18n="p3_cff">Descargar CITATION.cff</button>
         <button class="btn-ghost" id="btnFicha" data-i18n="p3_ficha">Copiar ficha del catálogo</button>
+        <button class="btn-ghost" id="btnRelease" data-i18n="p3_rel">Texto para la release</button>
         <span class="status" id="dlStatus"></span>
+      </div>
+
+      <div class="hidden" id="relBox" style="margin-top:16px">
+        <div class="field">
+          <label for="relTxt" data-i18n="p3_rel_l">Descripción de la versión para GitHub y Zenodo</label>
+          <textarea id="relTxt" style="min-height:230px" spellcheck="false"></textarea>
+        </div>
+        <p class="hint" style="margin:6px 0 0" data-i18n="p3_rel_hint">Español, inglés y tipo de aplicación. Revísalo, corrige lo que no encaje y pégalo en el cuadro <span class="mono">Describe this release</span> de GitHub: Zenodo lo recoge como descripción del registro.</p>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn-ghost" id="btnRelCopy" data-i18n="p3_rel_copy">Copiar al portapapeles</button>
+          <span class="status" id="relStatus"></span>
+        </div>
       </div>
 
       <details>
@@ -359,6 +372,19 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 16px}
             <li>Sube el fichero <span class="mono">index.html</span> que acabas de descargar.</li>
             <li>Entra en <strong>Settings → Pages</strong>, en Source elige <em>Deploy from a branch</em>, rama <span class="mono">main</span> y carpeta <span class="mono">/ (root)</span>.</li>
             <li>Espera un minuto: tu app está en <span class="mono">tuusuario.github.io/nombre-del-repo/</span>. Esa URL es tu entrega.</li>
+          </ol>
+        </div>
+      </details>
+
+      <details>
+        <summary data-i18n="p3_sum3">Cómo conectar el repositorio con Zenodo y publicar la versión</summary>
+        <div class="inner">
+          <ol style="font-size:14px;line-height:1.7;padding-left:20px;margin:0" data-i18n="p3_zsteps">
+            <li>Entra en <span class="mono">zenodo.org</span>, inicia sesión con tu cuenta de GitHub y autoriza el acceso.</li>
+            <li>Ve a <strong>tu perfil → GitHub</strong> y activa el interruptor del repositorio de tu app.</li>
+            <li>Vuelve a GitHub: <strong>Releases → Create a new release</strong>, etiqueta <span class="mono">v1.0.0</span>, título con el nombre de la app y la versión.</li>
+            <li>Pega en la descripción el texto del botón «Texto para la release» y publica. Zenodo archiva la versión y acuña el DOI.</li>
+            <li>Copia el DOI de concepto en tu <span class="mono">CITATION.cff</span> y en la ficha del catálogo.</li>
           </ol>
         </div>
       </details>
@@ -701,11 +727,19 @@ es:{
   p3_h:'3 · Tu app', p3_tag:'un fichero, cero dependencias',
   p3_note:'En esta previsualización tendrás que volver a escribir la clave: el navegador aísla la ventana de prueba. El fichero que descargues sí la recuerda.',
   p3_dl:'Descargar index.html', p3_cff:'Descargar CITATION.cff', p3_ficha:'Copiar ficha del catálogo',
+  p3_rel:'Texto para la release',
+  p3_rel_l:'Descripción de la versión para GitHub y Zenodo',
+  p3_rel_hint:'Español, inglés y tipo de aplicación. Revísalo, corrige lo que no encaje y pégalo en el cuadro <span class="mono">Describe this release</span> de GitHub: Zenodo lo recoge como descripción del registro.',
+  p3_rel_copy:'Copiar al portapapeles',
+  p3_sum3:'Cómo conectar el repositorio con Zenodo y publicar la versión',
   p3_sum1:'Cómo publicarla en GitHub Pages en 4 pasos',
   p3_steps:'<li>Crea un repositorio nuevo y público en GitHub. El nombre será parte de la URL.</li><li>Sube el fichero <span class="mono">index.html</span> que acabas de descargar.</li><li>Entra en <strong>Settings → Pages</strong>, en Source elige <em>Deploy from a branch</em>, rama <span class="mono">main</span> y carpeta <span class="mono">/ (root)</span>.</li><li>Espera un minuto: tu app está en <span class="mono">tuusuario.github.io/nombre-del-repo/</span>. Esa URL es tu entrega.</li>',
+  p3_zsteps:'<li>Entra en <span class="mono">zenodo.org</span>, inicia sesión con tu cuenta de GitHub y autoriza el acceso.</li><li>Ve a <strong>tu perfil → GitHub</strong> y activa el interruptor del repositorio de tu app.</li><li>Vuelve a GitHub: <strong>Releases → Create a new release</strong>, etiqueta <span class="mono">v1.0.0</span>, título con el nombre de la app y la versión.</li><li>Pega en la descripción el texto del botón «Texto para la release» y publica. Zenodo archiva la versión y acuña el DOI.</li><li>Copia el DOI de concepto en tu <span class="mono">CITATION.cff</span> y en la ficha del catálogo.</li>',
   p3_sum2:'Ver el código',
   st_dl:'Descargado. Súbelo tal cual, sin cambiarle el nombre.', st_cff:'CITATION.cff descargado. Súbelo junto al index.html.',
   st_ficha:'Ficha copiada. Pégala en el índice del catálogo.', st_nocopy:'No se pudo copiar. Ábrela en «Ver el código» y cópiala a mano.',
+  st_relwait:'Redactando la descripción…', st_relok:'Descripción lista. Léela y corrige lo que haga falta antes de copiarla.',
+  st_relcopy:'Copiado. Pégalo en la descripción de la release.', st_relfall:'Descripción provisional a partir de tus textos: revísala con calma.',
   foot:'ForjaIA · Herramientas IA para la academia · Universidad Miguel Hernández de Elche. Tu clave de API se guarda solo en tu navegador y nunca se envía a terceros. Ni ForjaIA ni las apps que genera deben recibir datos personales de estudiantes sin anonimizar.',
   blank_t:'Mi app docente', blank_s:'Descríbela en una frase',
   blank_sys:'Eres docente de [asignatura] en una universidad. Tu tarea es […]. Criterios: […]. Nunca inventes referencias bibliográficas ni asignes calificaciones.',
@@ -756,11 +790,19 @@ en:{
   p3_h:'3 · Your app', p3_tag:'one file, zero dependencies',
   p3_note:'In this preview you will have to type the key again: the browser isolates the test window. The file you download does remember it.',
   p3_dl:'Download index.html', p3_cff:'Download CITATION.cff', p3_ficha:'Copy catalogue entry',
+  p3_rel:'Release description',
+  p3_rel_l:'Release description for GitHub and Zenodo',
+  p3_rel_hint:'Spanish, English and the application type. Read it through, fix anything that does not fit and paste it into the <span class="mono">Describe this release</span> box on GitHub: Zenodo picks it up as the record description.',
+  p3_rel_copy:'Copy to clipboard',
+  p3_sum3:'How to connect the repository to Zenodo and publish the version',
   p3_sum1:'How to publish it on GitHub Pages in 4 steps',
   p3_steps:'<li>Create a new public repository on GitHub. Its name becomes part of the URL.</li><li>Upload the <span class="mono">index.html</span> file you just downloaded.</li><li>Go to <strong>Settings → Pages</strong>, under Source pick <em>Deploy from a branch</em>, branch <span class="mono">main</span>, folder <span class="mono">/ (root)</span>.</li><li>Wait a minute: your app is live at <span class="mono">yourname.github.io/repo-name/</span>. That URL is your submission.</li>',
+  p3_zsteps:'<li>Go to <span class="mono">zenodo.org</span>, sign in with your GitHub account and authorise access.</li><li>Open <strong>your profile → GitHub</strong> and flip the switch next to your app\'s repository.</li><li>Back on GitHub: <strong>Releases → Create a new release</strong>, tag <span class="mono">v1.0.0</span>, title with the app name and version.</li><li>Paste the text from the “Release description” button into the description and publish. Zenodo archives the version and mints the DOI.</li><li>Copy the concept DOI into your <span class="mono">CITATION.cff</span> and into the catalogue entry.</li>',
   p3_sum2:'View the code',
   st_dl:'Downloaded. Upload it as is, without renaming it.', st_cff:'CITATION.cff downloaded. Upload it next to index.html.',
   st_ficha:'Entry copied. Paste it into the catalogue index.', st_nocopy:'Could not copy. Open “View the code” and copy it by hand.',
+  st_relwait:'Writing the description…', st_relok:'Description ready. Read it and fix whatever you need before copying.',
+  st_relcopy:'Copied. Paste it into the release description.', st_relfall:'Provisional description built from your own texts: review it carefully.',
   foot:'ForjaIA · AI tools for academia · Universidad Miguel Hernández de Elche. Your API key is stored in your browser only and never sent to third parties. Neither ForjaIA nor the apps it builds should ever receive identifiable student data.',
   blank_t:'My teaching app', blank_s:'Describe it in one sentence',
   blank_sys:'You are a university lecturer in [course]. Your task is […]. Criteria: […]. Never invent references and never assign grades.',
@@ -811,11 +853,19 @@ pt:{
   p3_h:'3 · Seu aplicativo', p3_tag:'um arquivo, zero dependências',
   p3_note:'Nesta prévia você terá de digitar a chave de novo: o navegador isola a janela de teste. O arquivo que você baixar guarda a chave.',
   p3_dl:'Baixar index.html', p3_cff:'Baixar CITATION.cff', p3_ficha:'Copiar ficha do catálogo',
+  p3_rel:'Texto para a release',
+  p3_rel_l:'Descrição da versão para o GitHub e o Zenodo',
+  p3_rel_hint:'Espanhol, inglês e tipo de aplicativo. Revise, corrija o que não encaixar e cole na caixa <span class="mono">Describe this release</span> do GitHub: o Zenodo usa esse texto como descrição do registro.',
+  p3_rel_copy:'Copiar para a área de transferência',
+  p3_sum3:'Como conectar o repositório ao Zenodo e publicar a versão',
   p3_sum1:'Como publicar no GitHub Pages em 4 passos',
   p3_steps:'<li>Crie um repositório novo e público no GitHub. O nome fará parte da URL.</li><li>Suba o arquivo <span class="mono">index.html</span> que você acabou de baixar.</li><li>Vá em <strong>Settings → Pages</strong>, em Source escolha <em>Deploy from a branch</em>, branch <span class="mono">main</span> e pasta <span class="mono">/ (root)</span>.</li><li>Espere um minuto: seu aplicativo está em <span class="mono">seuusuario.github.io/nome-do-repo/</span>. Essa URL é a sua entrega.</li>',
+  p3_zsteps:'<li>Entre em <span class="mono">zenodo.org</span>, faça login com sua conta do GitHub e autorize o acesso.</li><li>Vá em <strong>seu perfil → GitHub</strong> e ative a chave do repositório do seu aplicativo.</li><li>Volte ao GitHub: <strong>Releases → Create a new release</strong>, tag <span class="mono">v1.0.0</span>, título com o nome do aplicativo e a versão.</li><li>Cole na descrição o texto do botão «Texto para a release» e publique. O Zenodo arquiva a versão e cunha o DOI.</li><li>Copie o DOI de conceito no seu <span class="mono">CITATION.cff</span> e na ficha do catálogo.</li>',
   p3_sum2:'Ver o código',
   st_dl:'Baixado. Suba assim mesmo, sem renomear.', st_cff:'CITATION.cff baixado. Suba junto com o index.html.',
   st_ficha:'Ficha copiada. Cole no índice do catálogo.', st_nocopy:'Não foi possível copiar. Abra «Ver o código» e copie manualmente.',
+  st_relwait:'Redigindo a descrição…', st_relok:'Descrição pronta. Leia e corrija o que for preciso antes de copiar.',
+  st_relcopy:'Copiado. Cole na descrição da release.', st_relfall:'Descrição provisória feita a partir dos seus textos: revise com calma.',
   foot:'ForjaIA · Ferramentas de IA para a academia · Universidad Miguel Hernández de Elche. Sua chave de API fica somente no seu navegador e nunca é enviada a terceiros. Nem o ForjaIA nem os aplicativos que ele gera devem receber dados pessoais de estudantes sem anonimizar.',
   blank_t:'Meu aplicativo docente', blank_s:'Descreva em uma frase',
   blank_sys:'Você é docente de [disciplina] em uma universidade. Sua tarefa é […]. Critérios: […]. Nunca invente referências bibliográficas nem atribua notas.',
@@ -1247,6 +1297,71 @@ $('btnFicha').onclick = function(){
   navigator.clipboard.writeText(ficha).then(
     function(){ estado('dlStatus','st_ficha','ok'); },
     function(){ estado('dlStatus','st_nocopy','err'); }
+  );
+};
+
+/* ══ Descripción de la versión (GitHub release → Zenodo) ══ */
+var PIE_RELEASE = 'Aplicación web de un solo fichero (HTML/JS, sin backend); funciona íntegramente en el navegador y la API key del usuario se almacena localmente. App generada para el curso Del prompt al DOI: herramientas personalizadas de enseñanza e investigación que se incluirán en el catálogo [Herramientas IA para la academia](https://fborrasumh.github.io/ia/) (Universidad Miguel Hernández de Elche).';
+
+function montaRelease(es, en){
+  return [String(es || '').trim(), String(en || '').trim(), PIE_RELEASE]
+    .filter(Boolean).join('\n\n');
+}
+function textoEn(s, l){
+  if(s.base === l) return {t:s.titulo, d:s.subtitulo, campos:s.campos.map(function(c){ return c.label; })};
+  var tr = s.trad[l] || {};
+  return {
+    t: tr.titulo || s.titulo,
+    d: tr.subtitulo || s.subtitulo,
+    campos: s.campos.map(function(c, i){ return ((tr.campos || [])[i] || {}).label || c.label; })
+  };
+}
+function releaseLocal(s){
+  var es = textoEn(s, 'es'), en = textoEn(s, 'en');
+  return montaRelease(
+    es.d + ' Recoge ' + es.campos.join(', ') + ' y devuelve una respuesta estructurada que puede copiarse o descargarse en Markdown.',
+    en.d + ' It takes ' + en.campos.join(', ') + ' and returns a structured response that can be copied or downloaded as Markdown.'
+  );
+}
+$('btnRelease').onclick = function(){
+  if(!htmlGenerado || !spec){ estado('dlStatus','st_nospec','err'); return; }
+  var s = spec;
+  $('relBox').classList.remove('hidden');
+  $('btnRelease').disabled = true;
+  estado('relStatus','st_relwait','');
+  var payload = {
+    titulo: s.titulo, subtitulo: s.subtitulo,
+    encargo: s.systemPrompt, salida: s.instruccionSalida,
+    campos: s.campos.map(function(c){ return {label:c.label, tipo:c.tipo, opciones:c.opciones}; }),
+    idiomas: s.idiomas || [s.base]
+  };
+  var sys = 'Redactas la descripción de una versión de software académico para una release de GitHub archivada en Zenodo. '
+    + 'Recibes la especificación de una app y devuelves EXCLUSIVAMENTE un JSON {"es":"","en":""}. '
+    + '"es" es un único párrafo en español y "en" el mismo contenido en inglés académico natural, no una traducción literal. '
+    + 'Cada párrafo: entre 55 y 90 palabras, empieza directamente por un verbo en tercera persona del presente, sin repetir el nombre de la app. '
+    + 'Describe qué recibe, cómo lo procesa, qué produce y en qué formato se exporta o se copia el resultado. '
+    + 'Vocabulario concreto y verificable, sin adjetivos publicitarios, sin listas, sin títulos, sin markdown, sin viñetas. '
+    + 'No menciones la clave de API, el modelo ni la tecnología: eso va aparte. No inventes funciones que no estén en la especificación.';
+  llama([{role:'system', content:sys}, {role:'user', content: JSON.stringify(payload)}], 900)
+    .then(function(r){
+      $('relTxt').value = montaRelease(r.es, r.en);
+      estado('relStatus','st_relok','ok');
+    })
+    .catch(function(e){
+      $('relTxt').value = releaseLocal(s);
+      estado('relStatus', errorLegible(e) + ' · ' + t('st_relfall'), 'err');
+    })
+    .then(function(){
+      $('btnRelease').disabled = false;
+      if($('relBox').scrollIntoView) $('relBox').scrollIntoView({behavior:'smooth', block:'nearest'});
+    });
+};
+$('btnRelCopy').onclick = function(){
+  var txt = $('relTxt').value;
+  if(!txt){ return; }
+  navigator.clipboard.writeText(txt).then(
+    function(){ estado('relStatus','st_relcopy','ok'); },
+    function(){ $('relTxt').select(); estado('relStatus','st_nocopy','err'); }
   );
 };
 
