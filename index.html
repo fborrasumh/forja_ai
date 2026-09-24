@@ -1,6 +1,64 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script id="gpt6-luna-shim">
+/* gpt-6-luna: modelo por defecto con temperatura=1 (actualización sep-2026).
+   Adapta las peticiones a la API de OpenAI para la familia gpt-6:
+   temperature=1, max_tokens -> max_completion_tokens (con margen para razonamiento)
+   y reintento automático si la API rechaza algún parámetro. */
+(function(){
+  var NEW='gpt-6-luna', OLD='gpt-4o-mini';
+  try{
+    if(!localStorage.getItem('__gpt6_luna_mig_v1')){
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i), v=localStorage.getItem(k);
+        if(v===OLD||v==='"'+OLD+'"'){ localStorage.setItem(k, v.replace(OLD,NEW)); continue; }
+        if(v && v.length<20000 && v.charAt(0)==='{' && v.indexOf(OLD)>=0){
+          try{ var o=JSON.parse(v), ch=false;
+            for(var p in o){ if(o[p]===OLD){ o[p]=NEW; ch=true; } }
+            if(ch) localStorage.setItem(k, JSON.stringify(o));
+          }catch(e){}
+        }
+      }
+      localStorage.setItem('__gpt6_luna_mig_v1','1');
+    }
+  }catch(e){}
+  var of=window.fetch; if(!of) return;
+  function adapt(url,b){
+    if(!b || typeof b.model!=='string' || !/^gpt-6/.test(b.model)) return false;
+    b.temperature=1;
+    ['top_p','frequency_penalty','presence_penalty','logit_bias','logprobs','top_logprobs'].forEach(function(p){ delete b[p]; });
+    if(/chat\/completions/.test(url) && b.max_tokens!=null){
+      if(b.max_completion_tokens==null) b.max_completion_tokens=Math.min(128000, (+b.max_tokens||0)+6000);
+      delete b.max_tokens;
+    }
+    return true;
+  }
+  window.fetch=function(input,init){
+    var url=typeof input==='string'?input:(input&&input.url)||'';
+    if(!/api\.openai\.com\/v1\/(chat\/completions|responses)/.test(url) || !init || typeof init.body!=='string') return of.apply(this,arguments);
+    var b; try{ b=JSON.parse(init.body); }catch(e){ return of.apply(this,arguments); }
+    if(!adapt(url,b)) return of.apply(this,arguments);
+    var self=this, tries=0;
+    function go(){
+      var ini=Object.assign({},init,{body:JSON.stringify(b)});
+      return of.call(self,input,ini).then(function(r){
+        if(r.status!==400 || tries>=3) return r;
+        return r.clone().json().then(function(j){
+          var err=(j&&j.error)||{}, p=err.param, msg=String(err.message||'');
+          if(!p){ var m=msg.match(/'([a-z_]+)'/); if(m) p=m[1]; }
+          if(p && b.hasOwnProperty(p) && /unsupported|not supported|does not support|only the default/i.test(msg)){
+            delete b[p]; tries++; return go();
+          }
+          return r;
+        },function(){ return r; });
+      });
+    }
+    return go();
+  };
+})();
+</script>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ForjaIA · Crea tu app docente de un solo fichero</title>
@@ -207,7 +265,7 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 16px}
     <div class="panel-head"><h2 data-i18n="k_h">Tu clave de OpenAI</h2><span class="tag" data-i18n="k_tag">se queda en este navegador</span></div>
     <div class="panel-body">
       <div class="aviso" data-i18n="k_aviso">
-        La recarga mínima en OpenAI son 5 $, pero el consumo real de este curso son <strong>céntimos</strong>: con <span class="mono">gpt-4o-mini</span> una app generada cuesta menos de 0,01 €. Pon un límite de gasto en tu cuenta antes de empezar.
+        La recarga mínima en OpenAI son 5 $, pero el consumo real de este curso son <strong>céntimos</strong>: con <span class="mono">gpt-6-luna</span> una app generada cuesta menos de 0,01 €. Pon un límite de gasto en tu cuenta antes de empezar.
       </div>
       <div class="grid2">
         <div class="field">
@@ -217,7 +275,7 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 16px}
         <div class="field">
           <label for="modelo" data-i18n="k_lab2">Modelo que forja la app</label>
           <select id="modelo">
-            <option value="gpt-4o-mini" selected data-i18n="k_m1">gpt-4o-mini — el más barato</option>
+            <option value="gpt-6-luna" selected>gpt-6-luna · más capaz y más barato (recomendado)</option><option value="gpt-4o-mini" data-i18n="k_m1">gpt-4o-mini — el más barato</option>
             <option value="gpt-5.6-luna" data-i18n="k_m3">gpt-5.6-luna — razona, sigue siendo barato</option>
             <option value="gpt-5.6-terra" data-i18n="k_m4">gpt-5.6-terra — equilibrado</option>
             <option value="gpt-5.6-sol" data-i18n="k_m5">gpt-5.6-sol — el más capaz, el más caro</option>
@@ -300,7 +358,7 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 16px}
         <div class="field">
           <label for="sModelo" data-i18n="p2_l6">Modelo que usará tu app</label>
           <select id="sModelo">
-            <option value="gpt-4o-mini" selected>gpt-4o-mini</option>
+            <option value="gpt-6-luna" selected>gpt-6-luna · más capaz y más barato (recomendado)</option><option value="gpt-4o-mini">gpt-4o-mini</option>
             <option value="gpt-5.6-luna">gpt-5.6-luna</option>
             <option value="gpt-5.6-terra">gpt-5.6-terra</option>
             <option value="gpt-5.6-sol">gpt-5.6-sol</option>
@@ -558,7 +616,7 @@ footer{max-width:840px;margin:0 auto;padding:0 20px 50px;font-size:12.5px;color:
   /* gpt-5.x y o3/o4 razonan: no admiten temperature ni max_tokens */
   function cuerpoLlamada(modelo, mensajes){
     var b = {model: modelo, messages: mensajes};
-    if(/^(gpt-5|o[34])/.test(modelo)){
+    if(/^(gpt-[56]|o[34])/.test(modelo)){
       b.reasoning_effort = 'low';
       b.max_completion_tokens = 8000;
     } else {
@@ -664,7 +722,7 @@ footer{max-width:840px;margin:0 auto;padding:0 20px 50px;font-size:12.5px;color:
     fetch('https://api.openai.com/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-      body: JSON.stringify(cuerpoLlamada(SPEC.modelo || 'gpt-4o-mini', [
+      body: JSON.stringify(cuerpoLlamada(SPEC.modelo || 'gpt-6-luna', [
         {role:'system', content: SPEC.systemPrompt + '\n\n' + SPEC.instruccionSalida + '\n\n' + u.lang},
         {role:'user', content: datos.join('\n')}
       ]))
@@ -723,7 +781,7 @@ es:{
   r2t:'Ajusta', r2d:'Revisa el encargo y los campos',
   r3t:'Publica', r3d:'Descarga, sube y cita',
   k_h:'Tu clave de OpenAI', k_tag:'se queda en este navegador',
-  k_aviso:'La recarga mínima en OpenAI son 5 $, pero el consumo real de este curso son <strong>céntimos</strong>: con <span class="mono">gpt-4o-mini</span> una app generada cuesta menos de 0,01 €. Pon un límite de gasto en tu cuenta antes de empezar.',
+  k_aviso:'La recarga mínima en OpenAI son 5 $, pero el consumo real de este curso son <strong>céntimos</strong>: con <span class="mono">gpt-6-luna</span> una app generada cuesta menos de 0,01 €. Pon un límite de gasto en tu cuenta antes de empezar.',
   k_lab:'Clave de API', k_lab2:'Modelo que forja la app',
   k_m3:'gpt-5.6-luna — razona, sigue siendo barato', k_m4:'gpt-5.6-terra — equilibrado', k_m5:'gpt-5.6-sol — el más capaz, el más caro',
   st_vacio:'El modelo agotó su presupuesto razonando y no devolvió nada. Repite, o prueba con gpt-4o-mini.',
@@ -793,7 +851,7 @@ en:{
   r2t:'Adjust', r2d:'Review the brief and the fields',
   r3t:'Publish', r3d:'Download, upload and cite',
   k_h:'Your OpenAI key', k_tag:'stays in this browser',
-  k_aviso:'The minimum top-up at OpenAI is $5, but this course actually costs <strong>cents</strong>: with <span class="mono">gpt-4o-mini</span> one generated app costs under €0.01. Set a spending limit on your account before you start.',
+  k_aviso:'The minimum top-up at OpenAI is $5, but this course actually costs <strong>cents</strong>: with <span class="mono">gpt-6-luna</span> one generated app costs under €0.01. Set a spending limit on your account before you start.',
   k_lab:'API key', k_lab2:'Model that forges the app',
   k_m3:'gpt-5.6-luna — reasons, still cheap', k_m4:'gpt-5.6-terra — balanced', k_m5:'gpt-5.6-sol — the most capable, the priciest',
   st_vacio:'The model spent its whole budget reasoning and returned nothing. Try again, or switch to gpt-4o-mini.',
@@ -863,7 +921,7 @@ pt:{
   r2t:'Ajuste', r2d:'Revise a instrução e os campos',
   r3t:'Publique', r3d:'Baixe, suba e cite',
   k_h:'Sua chave da OpenAI', k_tag:'fica neste navegador',
-  k_aviso:'A recarga mínima na OpenAI é de US$ 5, mas o consumo real deste curso é de <strong>centavos</strong>: com <span class="mono">gpt-4o-mini</span> um aplicativo gerado custa menos de R$ 0,05. Defina um limite de gasto na sua conta antes de começar.',
+  k_aviso:'A recarga mínima na OpenAI é de US$ 5, mas o consumo real deste curso é de <strong>centavos</strong>: com <span class="mono">gpt-6-luna</span> um aplicativo gerado custa menos de R$ 0,05. Defina um limite de gasto na sua conta antes de começar.',
   k_lab:'Chave de API', k_lab2:'Modelo que forja o aplicativo',
   k_m3:'gpt-5.6-luna — raciocina e continua barato', k_m4:'gpt-5.6-terra — equilibrado', k_m5:'gpt-5.6-sol — o mais capaz, o mais caro',
   st_vacio:'O modelo gastou todo o orçamento raciocinando e não devolveu nada. Tente de novo ou use o gpt-4o-mini.',
@@ -999,7 +1057,7 @@ function pintaChips(){
 /* Los modelos de razonamiento (gpt-5.x, o3, o4) no admiten temperature ni
    max_tokens en /chat/completions: usan max_completion_tokens, y los tokens
    de razonamiento salen de ese mismo presupuesto. */
-function razona(m){ return /^(gpt-5|o[34])/.test(m || ''); }
+function razona(m){ return /^(gpt-[56]|o[34])/.test(m || ''); }
 function cuerpo(modelo, mensajes, maxTok, json){
   var b = {model: modelo, messages: mensajes};
   if(json) b.response_format = {type:'json_object'};
@@ -1072,7 +1130,7 @@ function normaliza(s){
   s.systemPrompt = s.systemPrompt || '';
   s.instruccionSalida = s.instruccionSalida || t('blank_out');
   s.botonLabel = s.botonLabel || t('blank_btn');
-  s.modelo = s.modelo || 'gpt-4o-mini';
+  s.modelo = s.modelo || 'gpt-6-luna';
   if(!Array.isArray(s.campos) || !s.campos.length){
     s.campos = [{id:'tema', label:t('blank_c'), tipo:'text', placeholder:t('blank_cph'), opciones:[], requerido:true}];
   }
