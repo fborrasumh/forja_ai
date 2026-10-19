@@ -1,66 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<script id="gpt6-luna-shim">
-/* gpt-6-luna: modelo por defecto con temperatura=1 (actualización sep-2026).
-   Adapta las peticiones a la API de OpenAI para la familia gpt-6:
-   temperature=1, max_tokens -> max_completion_tokens (con margen para razonamiento)
-   y reintento automático si la API rechaza algún parámetro. */
-(function(){
-  var NEW='gpt-6-luna', OLD='gpt-4o-mini';
-  try{
-    if(!localStorage.getItem('__gpt6_luna_mig_v1')){
-      for(var i=0;i<localStorage.length;i++){
-        var k=localStorage.key(i), v=localStorage.getItem(k);
-        if(v===OLD||v==='"'+OLD+'"'){ localStorage.setItem(k, v.replace(OLD,NEW)); continue; }
-        if(v && v.length<20000 && v.charAt(0)==='{' && v.indexOf(OLD)>=0){
-          try{ var o=JSON.parse(v), ch=false;
-            for(var p in o){ if(o[p]===OLD){ o[p]=NEW; ch=true; } }
-            if(ch) localStorage.setItem(k, JSON.stringify(o));
-          }catch(e){}
-        }
-      }
-      localStorage.setItem('__gpt6_luna_mig_v1','1');
-    }
-  }catch(e){}
-  var of=window.fetch; if(!of) return;
-  function adapt(url,b){
-    if(!b || typeof b.model!=='string' || !/^gpt-6/.test(b.model)) return false;
-    b.temperature=1;
-    ['top_p','frequency_penalty','presence_penalty','logit_bias','logprobs','top_logprobs'].forEach(function(p){ delete b[p]; });
-    if(/chat\/completions/.test(url) && b.max_tokens!=null){
-      if(b.max_completion_tokens==null) b.max_completion_tokens=Math.min(128000, (+b.max_tokens||0)+6000);
-      delete b.max_tokens;
-    }
-    return true;
-  }
-  window.fetch=function(input,init){
-    var url=typeof input==='string'?input:(input&&input.url)||'';
-    if(!/api\.openai\.com\/v1\/(chat\/completions|responses)/.test(url) || !init || typeof init.body!=='string') return of.apply(this,arguments);
-    var b; try{ b=JSON.parse(init.body); }catch(e){ return of.apply(this,arguments); }
-    if(!adapt(url,b)) return of.apply(this,arguments);
-    var self=this, tries=0;
-    function go(){
-      var ini=Object.assign({},init,{body:JSON.stringify(b)});
-      return of.call(self,input,ini).then(function(r){
-        if(r.status!==400 || tries>=3) return r;
-        return r.clone().json().then(function(j){
-          var err=(j&&j.error)||{}, p=err.param, msg=String(err.message||'');
-          if(!p){ var m=msg.match(/'([a-z_]+)'/); if(m) p=m[1]; }
-          if(p && b.hasOwnProperty(p) && /unsupported|not supported|does not support|only the default/i.test(msg)){
-            delete b[p]; tries++; return go();
-          }
-          return r;
-        },function(){ return r; });
-      });
-    }
-    return go();
-  };
-})();
-</script>
-
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src https://api.openai.com https://generativelanguage.googleapis.com https://api.anthropic.com; frame-src 'self' blob: data:; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="author" content="Fernando Borrás Rocher (ORCID 0000-0002-5519-4573), Universidad Miguel Hernández de Elche">
 <title>ForjaIA · Crea tu app docente con IA, sin programar</title>
 <meta name="description" content="ForjaIA guía paso a paso al profesorado universitario para crear, probar y publicar en GitHub y Zenodo su propia app docente con IA: generadores, tutores simulados, cuestionarios, tarjetas de estudio y método Feynman. Universidad Miguel Hernández de Elche.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -110,9 +54,11 @@ svg.i{width:1.15em;height:1.15em;vertical-align:-.2em;fill:none;stroke:currentCo
 .tb-tools{display:flex;align-items:center;gap:6px}
 .tb-btn{background:transparent;border:1px solid #3E5C7D;color:#C9D8E6;border-radius:9px;padding:6px 10px;font:600 13px var(--texto);cursor:pointer;display:flex;align-items:center;gap:6px}
 .tb-btn:hover{border-color:var(--brasa);color:#fff}
-.lang{display:flex;gap:3px}
-.lang-b{background:transparent;border:1px solid #3E5C7D;color:#A9C0D4;font:700 11.5px var(--texto);padding:6px 8px;border-radius:8px;cursor:pointer;letter-spacing:.05em}
-.lang-b[aria-pressed="true"]{background:var(--brasa);border-color:var(--brasa);color:#fff}
+.tb-lang{display:flex;align-items:center}.tb-sel{background:transparent;border:1px solid #3E5C7D;color:#C9D8E6;border-radius:9px;padding:6px 8px;font:600 13px var(--texto);cursor:pointer;max-width:120px}.tb-sel:hover{border-color:var(--brasa);color:#fff}.tb-sel:focus-visible{outline:2px solid var(--brasa);outline-offset:2px}.tb-sel option{color:#0F2237;background:#fff}
+.fa-autores{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.14)}.fa-autores-cap{font:600 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#8FA7BE;width:100%;margin-bottom:-4px}
+.fa-autor{display:flex;gap:11px;align-items:center}.fa-autor b{display:block;color:#fff;font:700 16px var(--display)}.fa-autor small{display:block;color:#9DB6CD;font-size:12.5px;max-width:34ch}.fa-av{width:44px;height:44px;border-radius:14px;background:var(--c);color:#fff;display:grid;place-items:center;font:800 15px var(--display);flex:none;box-shadow:0 10px 20px -12px var(--c)}
+.fa-orcid{display:block;margin-top:2px;font:600 11.5px var(--mono);letter-spacing:.02em;color:#7FD6C4!important;text-decoration:none}.fa-orcid:hover{text-decoration:underline}.fa-idea{width:100%;margin:2px 0 0;font-size:13px;color:#9DB6CD;max-width:72ch}
+.fa-modrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}.fa-modrow .status{margin:0}#modelo{margin-top:8px}
 .progress{height:4px;background:#1E3550}
 .progress span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brasa),#F59E0B);transition:width .4s}
 @media(max-width:1020px){.sdot .lbl{display:none}.sdot[data-state="now"] .lbl{display:inline}}
@@ -143,7 +89,7 @@ main{max-width:1240px;margin:0 auto;padding:26px 16px 40px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .cols{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start}
-@media(max-width:900px){.cols{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){.cols{grid-template-columns:minmax(0,1fr)}.grid3{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr}}
 
 label,.lab{display:block;font-size:13.5px;font-weight:600;margin:0 0 6px;color:var(--acero)}
@@ -302,7 +248,7 @@ button{font-family:var(--texto);cursor:pointer}
 /* Ajusta */
 .ajusta{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
 .pvsticky{position:sticky;top:96px}
-@media(max-width:1000px){.ajusta{grid-template-columns:1fr}.pvsticky{position:static}}
+@media(max-width:1000px){.ajusta{grid-template-columns:minmax(0,1fr)}.pvsticky{position:static}}
 .acc{background:#fff;border:1px solid var(--linea);border-radius:var(--r);margin-bottom:12px;box-shadow:var(--sombra);overflow:hidden}
 .acc>summary{list-style:none;cursor:pointer;padding:15px 18px;display:flex;align-items:center;gap:12px}
 .acc>summary::-webkit-details-marker{display:none}
@@ -335,7 +281,7 @@ button{font-family:var(--texto);cursor:pointer}
 .pvbar{display:flex;align-items:center;gap:7px;padding:9px 12px;background:var(--tinta)}
 .pvbar .dot{width:10px;height:10px;border-radius:50%;background:#4A6787}
 .pvbar .dot:nth-child(1){background:#F26B5B}.pvbar .dot:nth-child(2){background:#F5BF4F}.pvbar .dot:nth-child(3){background:#5CC77B}
-.pvurl{flex:1;font:12px var(--mono);color:#A9C0D4;background:#1B3350;border-radius:7px;padding:5px 10px;margin-left:8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.pvurl{flex:1;min-width:0;font:12px var(--mono);color:#A9C0D4;background:#1B3350;border-radius:7px;padding:5px 10px;margin-left:8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .pvbar .tb-btn{padding:4px 8px}
 .pvframe{background:#E9EEF3;display:flex;justify-content:center}
 .pvframe iframe{width:100%;height:640px;border:0;display:block;background:#fff;transition:width .3s}
@@ -349,7 +295,8 @@ button{font-family:var(--texto);cursor:pointer}
 .checklist input{width:19px;height:19px;accent-color:var(--forjado);margin-top:2px;flex:none}
 .checklist label:has(input:checked){background:var(--forjado-suave);color:#0B5A4E}
 .timeline{position:relative;padding-left:0}
-.tstage{display:grid;grid-template-columns:56px 1fr;gap:16px;position:relative;padding-bottom:22px}
+.tstage{display:grid;grid-template-columns:56px minmax(0,1fr);gap:16px;position:relative;padding-bottom:22px}
+@media (max-width:560px){.tstage{grid-template-columns:40px minmax(0,1fr);gap:10px}.tstage .tsi{width:40px!important;height:40px!important;border-radius:12px!important}.tstage::before{left:19px!important;top:40px!important}.steps li{flex-wrap:wrap}.url-big{overflow-wrap:anywhere}}
 .tstage::before{content:"";position:absolute;left:27px;top:56px;bottom:0;width:2px;background:var(--linea)}
 .tstage:last-child::before{display:none}
 .tstage .tsi{width:56px;height:56px;border-radius:16px;background:var(--c);color:#fff;display:grid;place-items:center;box-shadow:0 10px 20px -12px var(--c)}
@@ -448,7 +395,7 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 14px}
     <div class="tb-tools">
       <button class="tb-btn" id="btnGlos" type="button"><svg class="i"><use href="#i-help"/></svg><span class="lbl" data-i18n="tb_glos"></span></button>
       <button class="tb-btn" id="btnSaveTop" type="button"><svg class="i"><use href="#i-save"/></svg><span class="lbl" data-i18n="tb_save"></span></button>
-      <div class="lang"><button type="button" class="lang-b" data-lang="es">ES</button><button type="button" class="lang-b" data-lang="en">EN</button><button type="button" class="lang-b" data-lang="pt">PT</button></div>
+      <div class="tb-lang" id="langBox"><select id="selLang" class="tb-sel" aria-label="Idioma"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option></select></div>
     </div>
   </div>
   <div class="progress"><span id="progBar"></span></div>
@@ -471,6 +418,9 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 14px}
       <svg class="i"><use href="#i-save"/></svg><span id="draftTxt" style="flex:1"></span>
       <button class="btn btn-primary btn-sm" id="btnDraftGo" type="button" data-i18n="h_draft_go"></button>
       <button class="btn btn-ghost btn-sm" id="btnDraftNo" type="button" data-i18n="h_draft_no"></button>
+    </div>
+    <div class="fa-autores"><span class="fa-autores-cap" data-i18n="h_autor">Realizada por</span>
+      <div class="fa-autor"><span class="fa-av" style="--c:#E4572E">FB</span><div><b>Fernando Borrás Rocher</b><small>Universidad Miguel Hernández de Elche</small><a class="fa-orcid" href="https://orcid.org/0000-0002-5519-4573" target="_blank" rel="noopener">ORCID 0000-0002-5519-4573</a></div></div>
     </div>
   </div>
 
@@ -496,10 +446,11 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 14px}
       <div class="card">
         <h3><span class="num">A</span><span data-i18n="s1_a"></span></h3>
         <p class="sub" data-i18n="s1_a_sub"></p>
+        <div class="field"><label for="selProv" data-i18n="s1_prov"></label><select id="selProv"><option value="openai">OpenAI</option><option value="gemini">Google Gemini</option><option value="anthropic">Anthropic Claude</option></select></div>
         <label for="apikey" data-i18n="s1_lab"></label>
         <div class="keyrow">
           <input type="password" id="apikey" placeholder="sk-..." autocomplete="off" spellcheck="false">
-          <button class="eye" id="btnEye" type="button" aria-label="Mostrar u ocultar"><svg class="i"><use href="#i-eye"/></svg></button>
+          <button class="eye" id="btnEye" type="button" aria-label="Mostrar u ocultar" data-i18n-attr="aria-label:eye_aria"><svg class="i"><use href="#i-eye"/></svg></button>
         </div>
         <div class="actions" style="margin-top:12px">
           <button class="btn btn-primary" id="btnKeySave" type="button"><svg class="i"><use href="#i-save"/></svg><span data-i18n="s1_save"></span></button>
@@ -511,7 +462,9 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 14px}
       <div class="card">
         <h3><span class="num">B</span><span data-i18n="s1_b"></span></h3>
         <p class="sub" data-i18n="s1_b_sub"></p>
-        <select id="modelo"></select>
+        <select id="selModelo" aria-label="Modelo"></select>
+        <input type="text" id="modelo" hidden autocomplete="off" spellcheck="false">
+        <div class="fa-modrow"><button class="btn btn-ghost btn-sm" id="btnModelos" type="button"><svg class="i"><use href="#i-refresh"/></svg><span data-i18n="s1_models"></span></button><span class="status" id="modStatus" role="status"></span></div>
       </div>
       <div class="aviso" data-i18n="s1_cost"></div>
     </div>
@@ -681,6 +634,7 @@ footer hr{border:0;border-top:1px solid var(--linea);margin:0 0 14px}
             <div class="field"><label for="mPais" data-i18n="a6_p"></label><input type="text" id="mPais" data-s="pais"></div>
             <div class="field"><label for="mOrcid" data-i18n="a6_o"></label><input type="text" id="mOrcid" data-s="orcid" placeholder="0000-0000-0000-0000"></div>
             <div class="field"><label for="mLic" data-i18n="a6_l"></label><select id="mLic" data-s="licencia"><option value="CC-BY-4.0">CC BY 4.0</option><option value="CC-BY-SA-4.0">CC BY-SA 4.0</option><option value="CC-BY-NC-4.0">CC BY-NC 4.0</option><option value="MIT">MIT</option></select></div>
+            <div class="field"><label for="sProv" data-i18n="a6_pv"></label><select id="sProv"><option value="openai">OpenAI</option><option value="gemini">Google Gemini</option><option value="anthropic">Anthropic Claude</option></select></div>
             <div class="field"><label for="sModelo" data-i18n="a6_m"></label><select id="sModelo" data-s="modelo"></select></div>
           </div>
         </div>
@@ -963,7 +917,9 @@ footer{max-width:860px;margin:0 auto;padding:16px 20px 50px;font-size:12.5px;col
     <summary id="cfgSum"></summary>
     <div class="inner">
       <p class="nota" id="cfgNota"></p>
+      <div class="f"><label for="pv" id="pvLab"></label><select id="pv"><option value="openai">OpenAI</option><option value="gemini">Google Gemini</option><option value="anthropic">Anthropic Claude</option></select></div>
       <div class="f"><label for="k" id="kLab"></label><input type="password" id="k" placeholder="sk-..." autocomplete="off"></div>
+      <div class="f"><label for="md" id="mdLab"></label><input type="text" id="md" autocomplete="off" spellcheck="false"></div>
       <div class="row"><button class="gh" id="save" type="button"></button><button class="gh" id="wipe" type="button"></button><span class="msg" id="kmsg"></span></div>
     </div>
   </details>
@@ -981,16 +937,16 @@ footer{max-width:860px;margin:0 auto;padding:16px 20px 50px;font-size:12.5px;col
   'use strict';
   var SPEC = JSON.parse(document.getElementById('spec').textContent);
   var PREVIEW = null; /*__PREVIEW__*/
-  var KEY = 'ia_openai_key';
+  var KEYS = {openai:'ia_openai_key', gemini:'ia_gemini_key', anthropic:'ia_anthropic_key'};
   var $ = function(id){ return document.getElementById(id); };
   var TIPO = SPEC.tipo || 'generador';
 
   var UI = {
-    es:{ cfg:'🔑 Configurar clave de OpenAI', nota:'Tu clave se guarda únicamente en este navegador y solo se envía a OpenAI. No introduzcas datos personales de estudiantes.',
+    es:{ cfg:'🔑 Configurar la IA (proveedor y clave)', nota:'Tu clave se guarda únicamente en este navegador y solo se envía al proveedor que elijas (OpenAI, Google o Anthropic). No introduzcas datos personales de estudiantes.', pvLab:'Proveedor de IA', mdLab:'Modelo', noModel:'Tu clave no tiene acceso al modelo «{m}». Cambia el modelo en el panel de configuración.',
       kLab:'Clave de API', save:'Guardar clave', wipe:'Borrar', saved:'Clave guardada.', loaded:'Clave cargada.', wiped:'Clave borrada de este navegador.',
       needKey:'Escribe la clave antes de guardar.', noKey:'Falta la clave de API: ábrela arriba y guárdala.', fill:'Completa: ', gen:'Pensando…', ready:'Listo.',
-      copy:'Copiar', dl:'Descargar', print:'Imprimir / PDF', copied:'Copiado al portapapeles.', quota:'Tu cuenta de OpenAI no tiene saldo. Recarga y vuelve a intentarlo.',
-      badKey:'La clave no es válida. Revísala en el panel de configuración.', net:'No hay conexión con OpenAI. Revisa tu red.', empty:'El modelo no devolvió texto. Vuelve a intentarlo.', badJson:'La respuesta llegó con un formato inesperado. Vuelve a intentarlo.',
+      copy:'Copiar', dl:'Descargar', print:'Imprimir / PDF', copied:'Copiado al portapapeles.', quota:'Tu cuenta de {p} no tiene saldo o ha llegado a su límite. Revísala y vuelve a intentarlo.',
+      badKey:'La clave no es válida. Revísala en el panel de configuración.', net:'No hay conexión con {p}. Revisa tu red.', empty:'El modelo no devolvió texto. Vuelve a intentarlo.', badJson:'La respuesta llegó con un formato inesperado. Vuelve a intentarlo.',
       lang:'Responde íntegramente en español.', start:'Empezar', preview:'Vista previa en ForjaIA: se usa la clave que guardaste en ForjaIA.',
       foot:'Hecha con ForjaIA (Universidad Miguel Hernández de Elche). Las respuestas proceden de un modelo de lenguaje: revísalas con criterio.',
       other:'Otra versión', refineL:'¿Quieres cambiar algo?', refinePh:'Por ejemplo: hazlo más breve, añade un ejemplo, sube la dificultad…', refineB:'Aplicar cambio', refinePre:'Modifica tu respuesta anterior según esta indicación y devuelve la versión completa: ',
@@ -1000,11 +956,11 @@ footer{max-width:860px;margin:0 auto;padding:16px 20px 50px;font-size:12.5px;col
       nc:'Número de tarjetas', tap:'Toca la tarjeta para girarla (o pulsa la barra espaciadora)', know:'✓ Me la sé', again:'↺ Repasar', shuffle:'Barajar', csv:'Descargar para Anki (CSV)', hint:'Ver pista', done:'¡Has repasado todas las tarjetas!', doneS:'Intentos totales: ', restart:'Empezar de nuevo', newD:'Nuevas tarjetas', card:'Tarjeta', known:'dominadas', front:'Pregunta', back:'Respuesta',
       st1:'Elige el concepto', st2:'Explícalo', st3:'Recibe preguntas', st4:'Mejóralo', explL:'Tu explicación', explPh:'Explícalo con tus palabras, como si hablaras con alguien que no sabe nada del tema. Usa un ejemplo cotidiano.', words:'palabras', analyze:'Analizar mi explicación', crit:{claridad:'Claridad', precision:'Precisión', completitud:'Completitud', sencillez:'Sencillez'},
       strengths:'Lo que funciona', gaps:'Lagunas', errors:'Imprecisiones', jargon:'Términos sin explicar', curious:'Un estudiante curioso te pregunta…', nextStep:'Siguiente paso', improve:'Mejorar mi explicación', round:'Ronda', evo:'Tu evolución (media sobre 10)', minW:'Escribe al menos 30 palabras.', dlF:'Descargar mis rondas', concept:'Concepto', newC:'Otro concepto' },
-    en:{ cfg:'🔑 Set up your OpenAI key', nota:'Your key is stored in this browser only and is sent only to OpenAI. Never enter identifiable student data.',
+    en:{ cfg:'🔑 Set up the AI (provider and key)', nota:'Your key is stored in this browser only and is sent only to the provider you choose (OpenAI, Google or Anthropic). Never enter identifiable student data.', pvLab:'AI provider', mdLab:'Model', noModel:'Your key has no access to the model “{m}”. Change the model in the settings panel.',
       kLab:'API key', save:'Save key', wipe:'Delete', saved:'Key saved.', loaded:'Key loaded.', wiped:'Key deleted from this browser.',
       needKey:'Enter the key before saving.', noKey:'No API key yet: open the panel above and save one.', fill:'Please complete: ', gen:'Thinking…', ready:'Done.',
-      copy:'Copy', dl:'Download', print:'Print / PDF', copied:'Copied to clipboard.', quota:'Your OpenAI account has no credit left. Top it up and try again.',
-      badKey:'That key is not valid. Check it in the settings panel.', net:'Cannot reach OpenAI. Check your connection.', empty:'The model returned no text. Please try again.', badJson:'The answer came back in an unexpected format. Please try again.',
+      copy:'Copy', dl:'Download', print:'Print / PDF', copied:'Copied to clipboard.', quota:'Your {p} account has no credit or has reached its limit. Check it and try again.',
+      badKey:'That key is not valid. Check it in the settings panel.', net:'Cannot reach {p}. Check your connection.', empty:'The model returned no text. Please try again.', badJson:'The answer came back in an unexpected format. Please try again.',
       lang:'Answer entirely in English.', start:'Start', preview:'ForjaIA preview: using the key you saved in ForjaIA.',
       foot:'Built with ForjaIA (Universidad Miguel Hernández de Elche). Answers come from a language model: review them critically.',
       other:'Another version', refineL:'Want to change something?', refinePh:'For example: make it shorter, add an example, raise the difficulty…', refineB:'Apply change', refinePre:'Revise your previous answer following this instruction and return the full version: ',
@@ -1014,11 +970,11 @@ footer{max-width:860px;margin:0 auto;padding:16px 20px 50px;font-size:12.5px;col
       nc:'Number of cards', tap:'Tap the card to flip it (or press the space bar)', know:'✓ I know it', again:'↺ Review again', shuffle:'Shuffle', csv:'Download for Anki (CSV)', hint:'Show hint', done:'You have reviewed every card!', doneS:'Total attempts: ', restart:'Start over', newD:'New cards', card:'Card', known:'mastered', front:'Question', back:'Answer',
       st1:'Pick the concept', st2:'Explain it', st3:'Get questions', st4:'Improve it', explL:'Your explanation', explPh:'Explain it in your own words, as if talking to someone who knows nothing about the topic. Use an everyday example.', words:'words', analyze:'Analyse my explanation', crit:{claridad:'Clarity', precision:'Accuracy', completitud:'Completeness', sencillez:'Simplicity'},
       strengths:'What works', gaps:'Gaps', errors:'Inaccuracies', jargon:'Unexplained terms', curious:'A curious student asks you…', nextStep:'Next step', improve:'Improve my explanation', round:'Round', evo:'Your progress (average out of 10)', minW:'Write at least 30 words.', dlF:'Download my rounds', concept:'Concept', newC:'Another concept' },
-    pt:{ cfg:'🔑 Configurar chave da OpenAI', nota:'Sua chave fica somente neste navegador e só é enviada à OpenAI. Não insira dados pessoais de estudantes.',
+    pt:{ cfg:'🔑 Configurar a IA (provedor e chave)', nota:'Sua chave fica somente neste navegador e só é enviada ao provedor que você escolher (OpenAI, Google ou Anthropic). Não insira dados pessoais de estudantes.', pvLab:'Provedor de IA', mdLab:'Modelo', noModel:'Sua chave não tem acesso ao modelo «{m}». Troque o modelo no painel de configuração.',
       kLab:'Chave de API', save:'Salvar chave', wipe:'Apagar', saved:'Chave salva.', loaded:'Chave carregada.', wiped:'Chave apagada deste navegador.',
       needKey:'Digite a chave antes de salvar.', noKey:'Falta a chave de API: abra o painel acima e salve-a.', fill:'Complete: ', gen:'Pensando…', ready:'Pronto.',
-      copy:'Copiar', dl:'Baixar', print:'Imprimir / PDF', copied:'Copiado para a área de transferência.', quota:'Sua conta da OpenAI está sem saldo. Recarregue e tente de novo.',
-      badKey:'A chave não é válida. Verifique no painel de configuração.', net:'Sem conexão com a OpenAI. Verifique sua rede.', empty:'O modelo não devolveu texto. Tente novamente.', badJson:'A resposta veio em um formato inesperado. Tente novamente.',
+      copy:'Copiar', dl:'Baixar', print:'Imprimir / PDF', copied:'Copiado para a área de transferência.', quota:'Sua conta de {p} está sem saldo ou atingiu o limite. Verifique e tente de novo.',
+      badKey:'A chave não é válida. Verifique no painel de configuração.', net:'Sem conexão com {p}. Verifique sua rede.', empty:'O modelo não devolveu texto. Tente novamente.', badJson:'A resposta veio em um formato inesperado. Tente novamente.',
       lang:'Responda inteiramente em português do Brasil.', start:'Começar', preview:'Prévia no ForjaIA: usa a chave que você salvou no ForjaIA.',
       foot:'Feito com ForjaIA (Universidad Miguel Hernández de Elche). As respostas vêm de um modelo de linguagem: revise-as com critério.',
       other:'Outra versão', refineL:'Quer mudar algo?', refinePh:'Por exemplo: deixe mais curto, acrescente um exemplo, aumente a dificuldade…', refineB:'Aplicar mudança', refinePre:'Modifique sua resposta anterior segundo esta indicação e devolva a versão completa: ',
@@ -1089,8 +1045,6 @@ footer{max-width:860px;margin:0 auto;padding:16px 20px 50px;font-size:12.5px;col
     return h.join('');
   }
 
-  /* ── Llamada a OpenAI (con adaptación automática de parámetros) ── */
-  function getKey(){ return (PREVIEW && PREVIEW.key) || LS.getItem(KEY) || ($('k').value || '').trim(); }
   function cuerpo(modelo, msgs, max, json){
     var b = {model: modelo, messages: msgs};
     if(json) b.response_format = {type:'json_object'};
@@ -1098,48 +1052,88 @@ footer{max-width:860px;margin:0 auto;padding:16px 20px 50px;font-size:12.5px;col
     else { b.temperature = 0.7; b.max_tokens = max; }
     return b;
   }
+  /* ── Llamada a la IA: OpenAI, Google Gemini o Anthropic Claude, con la clave de cada persona ── */
+  var DEF = {openai:'gpt-6-luna', gemini:'gemini-2.5-flash', anthropic:'claude-haiku-4-5-20251001'};
+  var NOMP = {openai:'OpenAI', gemini:'Google Gemini', anthropic:'Anthropic Claude'};
+  var KPH = {openai:'sk-...', gemini:'AIza...', anthropic:'sk-ant-...'};
+  function getProv(){ var p = (PREVIEW && PREVIEW.provSel) || LS.getItem('forja_prov_' + SPEC.slug) || (PREVIEW && PREVIEW.prov) || SPEC.proveedor || 'openai'; return DEF[p] ? p : 'openai'; }
+  function getKey(p){ p = p || getProv(); if(PREVIEW && PREVIEW.key && p === (PREVIEW.prov || 'openai')) return PREVIEW.key; return LS.getItem(KEYS[p]) || ''; }
+  function getMod(p){ p = p || getProv(); return LS.getItem('forja_model_' + SPEC.slug + '_' + p) || (p === (SPEC.proveedor || 'openai') && SPEC.modelo) || DEF[p]; }
+  function errH(st, tx){ var e = new Error(String(tx).slice(0, 220) || ('Error ' + st)); e.status = st; return e; }
+  function reintenta(fn){
+    var k = 0;
+    function va(){ return fn().then(function(r){ if((r.status === 429 || r.status >= 500) && k < 3){ return r.clone().text().then(function(tx){ if(/quota|billing|credit|insufficient/i.test(tx)) return r; k++; return new Promise(function(ok){ setTimeout(ok, 900 * Math.pow(2, k)); }).then(va); }); } return r; }); }
+    return va();
+  }
   function api(msgs, opt){
     opt = opt || {};
-    var key = getKey();
+    var p = getProv(), key = getKey(p), mod = getMod(p), max = opt.max || 2200;
     if(!key) return Promise.reject(new Error('__NOKEY__'));
-    var b = cuerpo(SPEC.modelo || 'gpt-6-luna', msgs, opt.max || 2200, opt.json), tries = 0;
-    function go(){
-      return fetch('https://api.openai.com/v1/chat/completions', {
-        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + key}, body: JSON.stringify(b)
-      }).then(function(r){
-        return r.json().catch(function(){ return {}; }).then(function(d){
-          if(!r.ok){
-            var e = (d && d.error) || {}, m = String(e.message || ('Error ' + r.status)), p = e.param;
-            if(!p){ var mm = m.match(/'([a-z_]+)'/); if(mm) p = mm[1]; }
-            if(r.status === 400 && tries < 4 && p && b.hasOwnProperty(p) && /unsupported|not supported|does not support|only the default/i.test(m)){
-              if(p === 'max_tokens') b.max_completion_tokens = b.max_tokens;
-              if(p === 'temperature' && /only the default/i.test(m)) { delete b.temperature; }
-              delete b[p]; tries++; return go();
+    if(p === 'openai'){
+      var b = cuerpo(mod, msgs, max, opt.json), tries = 0;
+      var go = function(){
+        return reintenta(function(){ return fetch('https://api.openai.com/v1/chat/completions', {method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + key}, body: JSON.stringify(b)}); })
+        .then(function(r){
+          return r.text().then(function(tx){
+            var d = {}; try{ d = JSON.parse(tx); }catch(e){}
+            if(!r.ok){
+              var er = (d && d.error) || {}, m = String(er.message || tx || ('Error ' + r.status)), pa = er.param;
+              if(!pa){ var mm = m.match(/'([a-z_]+)'/); if(mm) pa = mm[1]; }
+              if(r.status === 400 && tries < 4 && pa && b.hasOwnProperty(pa) && /unsupported|not supported|does not support|only the default/i.test(m)){
+                if(pa === 'max_tokens') b.max_completion_tokens = b.max_tokens;
+                delete b[pa]; tries++; return go();
+              }
+              throw errH(r.status, m);
             }
-            throw new Error(m);
-          }
-          var txt = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
-          if(!txt.trim()) throw new Error('__EMPTY__');
-          return txt;
+            var txt = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+            if(!txt.trim()) throw new Error('__EMPTY__');
+            return txt;
+          });
         });
-      });
+      };
+      return go();
     }
-    return go();
+    var sys = msgs.filter(function(m){ return m.role === 'system'; }).map(function(m){ return m.content; }).join('\n\n'), conv = [];
+    msgs.filter(function(m){ return m.role !== 'system'; }).forEach(function(m){ var r = m.role === 'assistant' ? 'assistant' : 'user'; if(conv.length && conv[conv.length - 1].role === r) conv[conv.length - 1].text += '\n\n' + m.content; else conv.push({role:r, text:String(m.content)}); });
+    if(!conv.length || conv[0].role !== 'user') conv.unshift({role:'user', text:'.'});
+    var req;
+    if(p === 'gemini'){
+      var gb = {contents: conv.map(function(m){ return {role: m.role === 'assistant' ? 'model' : 'user', parts:[{text:m.text}]}; }), generationConfig:{maxOutputTokens: Math.max(max * 3, 4096), temperature:0.7}};
+      if(sys) gb.systemInstruction = {parts:[{text:sys}]};
+      if(opt.json) gb.generationConfig.responseMimeType = 'application/json';
+      req = function(){ return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(mod) + ':generateContent', {method:'POST', headers:{'Content-Type':'application/json','x-goog-api-key':key}, body:JSON.stringify(gb)}); };
+    } else {
+      var cm = conv.map(function(m){ return {role:m.role, content:m.text}; });
+      if(opt.json) cm[cm.length - 1].content += '\n\nResponde SOLO con un objeto JSON válido, sin texto alrededor.';
+      req = function(){ return fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body:JSON.stringify({model:mod, max_tokens:Math.max(max * 2, 2048), system:sys, messages:cm})}); };
+    }
+    return reintenta(req).then(function(r){
+      return r.text().then(function(tx){
+        if(!r.ok) throw errH(r.status, tx);
+        var j = JSON.parse(tx), txt;
+        if(p === 'gemini'){ var c = j.candidates && j.candidates[0]; txt = ((c && c.content && c.content.parts) || []).map(function(x){ return x.text || ''; }).join(''); }
+        else txt = (j.content || []).filter(function(x){ return x.type === 'text'; }).map(function(x){ return x.text; }).join('');
+        if(!String(txt).trim()) throw new Error('__EMPTY__');
+        return txt;
+      });
+    });
   }
   function apiJSON(msgs, max){
     return api(msgs, {json:true, max:max}).then(function(t){
+      t = String(t).trim().replace(/^```(?:json)?\s*|\s*```$/g, '');
       try{ return JSON.parse(t); }
       catch(e){ var m = t.match(/\{[\s\S]*\}/); if(m){ try{ return JSON.parse(m[0]); }catch(e2){} } throw new Error('__JSON__'); }
     });
   }
   function errMsg(e){
-    var u = T(), m = (e && e.message) || '';
+    var u = T(), m = (e && e.message) || '', st = e && e.status, pn = NOMP[getProv()];
     if(m === '__NOKEY__'){ $('cfg').open = true; return u.noKey; }
     if(m === '__EMPTY__') return u.empty;
     if(m === '__JSON__') return u.badJson;
-    if(/quota|billing/i.test(m)) return u.quota;
-    if(/Incorrect API key|invalid_api_key|401/.test(m)) return u.badKey;
-    if(/Failed to fetch|NetworkError|Load failed/i.test(m)) return u.net;
+    if(st === 401 || st === 403 || /Incorrect API key|invalid_api_key|API key not valid|API_KEY_INVALID|authentication_error/i.test(m)) return u.badKey;
+    if(st === 404 || /model_not_found|not_found_error|does not exist|is not found/i.test(m)) return u.noModel.replace('{m}', getMod());
+    if(/quota|billing|credit|insufficient|RESOURCE_EXHAUSTED/i.test(m)) return u.quota.replace('{p}', pn);
+    if(/Failed to fetch|NetworkError|Load failed/i.test(m)) return u.net.replace('{p}', pn);
     return m;
   }
   function sistema(extra, ctx){
@@ -1179,7 +1173,7 @@ footer{max-width:860px;margin:0 auto;padding:16px 20px 50px;font-size:12.5px;col
     $('h1').textContent = c.titulo; $('sub').textContent = c.subtitulo || '';
     $('how').innerHTML = c.instrucciones ? '<span>💡</span><span>' + esc(c.instrucciones) + '</span>' : '';
     $('cfgSum').textContent = u.cfg; $('cfgNota').textContent = PREVIEW ? u.preview : u.nota;
-    $('kLab').textContent = u.kLab; $('save').textContent = u.save; $('wipe').textContent = u.wipe;
+    $('kLab').textContent = u.kLab; $('pvLab').textContent = u.pvLab; $('mdLab').textContent = u.mdLab; $('save').textContent = u.save; $('wipe').textContent = u.wipe;
     $('run').textContent = c.boton || u.start; $('foot').textContent = u.foot;
     Array.prototype.forEach.call(document.querySelectorAll('#lang button'), function(b){ b.setAttribute('aria-pressed', b.dataset.l === lang ? 'true' : 'false'); });
     pintaForm();
@@ -1239,18 +1233,24 @@ footer{max-width:860px;margin:0 auto;padding:16px 20px 50px;font-size:12.5px;col
     return {texto: datos.join('\n'), n: nEl ? parseInt(nEl.value, 10) : 0, primero: SPEC.campos.length ? ($('c_' + SPEC.campos[0].id).value || '').trim() : ''};
   }
 
-  /* ── Clave ── */
-  var saved = LS.getItem(KEY) || '';
-  if(PREVIEW && PREVIEW.key){ $('k').value = PREVIEW.key; $('kmsg').textContent = T().loaded; $('kmsg').className = 'msg ok'; }
-  else if(saved){ $('k').value = saved; $('kmsg').textContent = T().loaded; $('kmsg').className = 'msg ok'; }
-  else { $('cfg').open = true; }
+  /* ── Proveedor, clave y modelo ── */
+  function pintaCfg(){
+    var p = getProv(), k = getKey(p);
+    $('pv').value = p; $('k').placeholder = KPH[p]; $('k').value = k; $('md').value = getMod(p); $('md').placeholder = DEF[p];
+    $('kmsg').textContent = k ? T().loaded : ''; $('kmsg').className = 'msg' + (k ? ' ok' : '');
+  }
+  pintaCfg();
+  if(!getKey()) $('cfg').open = true;
+  $('pv').onchange = function(){ if(PREVIEW) PREVIEW.provSel = this.value; LS.setItem('forja_prov_' + SPEC.slug, this.value); pintaCfg(); };
+  $('md').onchange = function(){ var v = this.value.trim(); if(v) LS.setItem('forja_model_' + SPEC.slug + '_' + getProv(), v); else LS.removeItem('forja_model_' + SPEC.slug + '_' + getProv()); $('md').value = getMod(); };
   $('save').onclick = function(){
-    var v = $('k').value.trim();
+    var v = $('k').value.trim(), p = getProv();
     if(!v){ $('kmsg').textContent = T().needKey; $('kmsg').className = 'msg err'; return; }
-    LS.setItem(KEY, v); if(PREVIEW) PREVIEW.key = v;
+    LS.setItem(KEYS[p], v); if(PREVIEW && p === (PREVIEW.prov || 'openai')) PREVIEW.key = v;
+    $('md').onchange();
     $('kmsg').textContent = T().saved; $('kmsg').className = 'msg ok'; $('cfg').open = false;
   };
-  $('wipe').onclick = function(){ LS.removeItem(KEY); if(PREVIEW) PREVIEW.key = ''; $('k').value = ''; $('kmsg').textContent = T().wiped; $('kmsg').className = 'msg'; };
+  $('wipe').onclick = function(){ var p = getProv(); LS.removeItem(KEYS[p]); if(PREVIEW && p === (PREVIEW.prov || 'openai')) PREVIEW.key = ''; $('k').value = ''; $('kmsg').textContent = T().wiped; $('kmsg').className = 'msg'; };
 
   function ocupado(on){ $('run').disabled = on; }
 
@@ -1608,7 +1608,7 @@ es:{
   s1_save:'Guardar', s1_test:'Probar clave', s1_wipe:'Borrar',
   s1_b:'Modelo que forja tu app', s1_b_sub:'El recomendado es el más capaz y barato. Cámbialo solo si tu formador te lo indica.',
   s1_cost:'💶 <strong>¿Cuánto cuesta?</strong> La recarga mínima en OpenAI es de 5 $, pero cada app generada cuesta <strong>menos de 0,01 €</strong> y cada uso de tus estudiantes, céntimos. Pon un límite de gasto mensual en tu cuenta antes de empezar.',
-  s1_how:'¿No tienes clave? Consíguela en 4 pasos',
+  s1_how:'¿No tienes clave? Así se consigue',
   s1_steps:'<li><span>Entra en <a href="https://platform.openai.com/signup" target="_blank" rel="noopener">platform.openai.com</a> y crea una cuenta (o inicia sesión).</span></li><li><span>En <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener">Billing</a> añade un método de pago y recarga 5 $.</span></li><li><span>En <a href="https://platform.openai.com/settings/organization/limits" target="_blank" rel="noopener">Limits</a> fija un límite de gasto mensual (por ejemplo, 5 $).</span></li><li><span>En <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">API keys</a> pulsa <b>Create new secret key</b>, cópiala y pégala aquí.</span></li>',
   s1_tip:'<strong>¿Aún no tienes clave?</strong> Sigue adelante igualmente: puedes abrir los ejemplos, diseñar tu app a mano y descargarla. Solo la necesitas para que la IA escriba por ti o para probar la app.',
   k_none:'Aún no hay ninguna clave guardada.', k_saved:'Clave guardada en este navegador.', k_loaded:'Clave cargada desde este navegador.', k_wiped:'Clave borrada de este navegador.',
@@ -1723,7 +1723,7 @@ en:{
   s1_save:'Save', s1_test:'Test key', s1_wipe:'Delete',
   s1_b:'Model that forges your app', s1_b_sub:'The recommended one is the most capable and cheapest. Only change it if your trainer tells you to.',
   s1_cost:'💶 <strong>How much does it cost?</strong> The minimum top-up at OpenAI is $5, but each generated app costs <strong>under €0.01</strong> and each student use, cents. Set a monthly spending limit on your account before you start.',
-  s1_how:'No key yet? Get one in 4 steps',
+  s1_how:'No key yet? Here is how to get one',
   s1_steps:'<li><span>Go to <a href="https://platform.openai.com/signup" target="_blank" rel="noopener">platform.openai.com</a> and create an account (or sign in).</span></li><li><span>In <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener">Billing</a> add a payment method and top up $5.</span></li><li><span>In <a href="https://platform.openai.com/settings/organization/limits" target="_blank" rel="noopener">Limits</a> set a monthly budget (for example, $5).</span></li><li><span>In <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">API keys</a> click <b>Create new secret key</b>, copy it and paste it here.</span></li>',
   s1_tip:'<strong>No key yet?</strong> Carry on anyway: you can open the examples, design your app by hand and download it. You only need it for the AI to write for you or to test the app.',
   k_none:'No key saved yet.', k_saved:'Key saved in this browser.', k_loaded:'Key loaded from this browser.', k_wiped:'Key deleted from this browser.',
@@ -1838,7 +1838,7 @@ pt:{
   s1_save:'Salvar', s1_test:'Testar chave', s1_wipe:'Apagar',
   s1_b:'Modelo que forja seu aplicativo', s1_b_sub:'O recomendado é o mais capaz e barato. Mude-o apenas se seu formador indicar.',
   s1_cost:'💶 <strong>Quanto custa?</strong> A recarga mínima na OpenAI é de US$ 5, mas cada aplicativo gerado custa <strong>menos de R$ 0,05</strong> e cada uso dos estudantes, centavos. Defina um limite de gasto mensal na sua conta antes de começar.',
-  s1_how:'Não tem chave? Consiga em 4 passos',
+  s1_how:'Não tem chave? Veja como obter',
   s1_steps:'<li><span>Entre em <a href="https://platform.openai.com/signup" target="_blank" rel="noopener">platform.openai.com</a> e crie uma conta (ou faça login).</span></li><li><span>Em <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener">Billing</a> adicione uma forma de pagamento e recarregue US$ 5.</span></li><li><span>Em <a href="https://platform.openai.com/settings/organization/limits" target="_blank" rel="noopener">Limits</a> defina um limite mensal (por exemplo, US$ 5).</span></li><li><span>Em <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">API keys</a> clique em <b>Create new secret key</b>, copie e cole aqui.</span></li>',
   s1_tip:'<strong>Ainda não tem chave?</strong> Siga em frente mesmo assim: você pode abrir os exemplos, projetar seu aplicativo manualmente e baixá-lo. Ela só é necessária para a IA escrever por você ou para testar o aplicativo.',
   k_none:'Ainda não há chave salva.', k_saved:'Chave salva neste navegador.', k_loaded:'Chave carregada deste navegador.', k_wiped:'Chave apagada deste navegador.',
@@ -1958,6 +1958,87 @@ pt:{
   tarjetas:[['🗣️ Inglês técnico','Cartões com termos técnicos da área em inglês, sua definição em português e um exemplo de uso em uma frase.','Inglês para fins específicos','Estudantes de Engenharia',1],['🦴 Anatomia','Cartões de estruturas anatômicas: localização, função, relações e inervação, do básico ao complexo.','Anatomia humana','Estudantes do 1.º ano de Ciências da Saúde',0],['📜 Conceitos jurídicos','Cartões com conceitos e institutos jurídicos, sua definição precisa e um exemplo para memorizar.','Direito civil','Estudantes do 1.º ano de Direito',3]],
   feynman:[['💻 Explique um algoritmo','O estudante explica com suas palavras como funciona um algoritmo ou estrutura de dados; a IA detecta lacunas, erros e termos sem explicar.','Programação','Estudantes de Computação',7],['⚛️ Conceitos de Física','O estudante explica conceitos de física (energia, entropia, campo elétrico) a um leigo; a IA avalia precisão e analogias.','Física geral','Estudantes do 1.º ano de Ciências e Engenharia',2],['🎓 Teorias da aprendizagem','O futuro professor explica uma teoria da aprendizagem como faria a uma família; a IA avalia rigor e clareza.','Psicologia da educação','Estudantes de Licenciatura/Pedagogia',6]]
 }};
+
+/* ══════ Proveedores de IA (OpenAI, Gemini, Claude), modelos de la clave, autoría e idioma ══════ */
+(function(){
+var A = {
+es:{
+  h_autor:'Realizada por', lang_aria:'Idioma', eye_aria:'Mostrar u ocultar la clave',
+  s1_h:'Conecta tu proveedor de IA',
+  s1_lede:'Tu app usará un modelo de IA de OpenAI, Google Gemini o Anthropic Claude con tu propia clave. La clave es como la llave de tu cuenta: se guarda solo en este navegador y solo se envía al proveedor que elijas.',
+  s1_prov:'Proveedor de IA',
+  s1_a_sub:'Elige el proveedor y pega su clave (OpenAI empieza por sk-…, Gemini por AIza…, Claude por sk-ant-…). Pulsa «Probar» para comprobar que funciona y cargar los modelos de tu clave.',
+  s1_lab:'Clave de API',
+  s1_b_sub:'El recomendado es económico y suficiente para forjar la app. Pulsa «Ver los modelos de mi clave» para elegir entre los que tiene tu cuenta.',
+  s1_models:'Ver los modelos de mi clave',
+  s1_cost:'💶 <strong>¿Cuánto cuesta?</strong> En OpenAI y Anthropic la recarga mínima ronda los 5 $; Google AI Studio ofrece un nivel gratuito con límites de uso. Cada app generada cuesta <strong>céntimos</strong> y cada uso de tus estudiantes, también. Pon un límite de gasto mensual en tu cuenta antes de empezar.',
+  s1_steps:'<li><span>Elige arriba el proveedor con el que ya tengas cuenta (o el que prefieras).</span></li><li><span><b>OpenAI:</b> en <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener">Billing</a> añade saldo, fija un límite en <a href="https://platform.openai.com/settings/organization/limits" target="_blank" rel="noopener">Limits</a> y crea la clave en <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">API keys</a>.</span></li><li><span><b>Google Gemini:</b> entra en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> y pulsa <b>Create API key</b>.</span></li><li><span><b>Anthropic Claude:</b> en la <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">consola de Anthropic</a> añade saldo y crea la clave.</span></li><li><span>Pégala aquí y pulsa «Probar»: verás los modelos disponibles en tu clave.</span></li>',
+  k_testing:'Comprobando con {p}…', k_bad:'{p} no reconoce esta clave. Cópiala de nuevo, sin espacios.', k_quota:'La clave es válida, pero tu cuenta no tiene saldo o ha llegado a su límite.', k_net:'No se pudo contactar con {p}. Revisa tu conexión.',
+  mod_cur:'actual', mod_rec:'recomendado', mod_notin:'no aparece en tu clave', mod_other:'Otro modelo (escribirlo)…', mod_ph:'Escribe el nombre exacto del modelo',
+  mod_loading:'Cargando los modelos de tu clave…', mod_n:'{n} modelos disponibles en tu clave: elígelo en el desplegable.', mod_none:'Tu clave no devolvió ningún modelo de texto. Escribe el nombre con «Otro modelo».', mod_nokey:'Primero guarda tu clave.',
+  st_vacio:'El modelo no devolvió nada. Inténtalo de nuevo o elige otro modelo en la parada 1.', st_quota:'Tu cuenta de {p} no tiene saldo o ha llegado a su límite. Revísala y reintenta.', st_badkey:'{p} no reconoce tu clave. Revísala en la parada 1.',
+  st_model:'Tu clave no tiene acceso al modelo «{m}». Elige otro en la parada 1.', st_json:'La IA no devolvió una respuesta con el formato esperado. Inténtalo de nuevo.', st_blocked:'El proveedor ha bloqueado la respuesta ({r}).',
+  a6_pv:'Proveedor de IA de tu app', a6_m:'Modelo que usará tu app (cada persona puede cambiarlo)',
+  rd_use_t:'1. Abre la app en el navegador.\n2. Pulsa «Configurar la IA», elige el proveedor (OpenAI, Google Gemini o Anthropic Claude), pega tu clave y guárdala (solo se almacena en tu navegador).\n3. Rellena el formulario y pulsa el botón principal.',
+  rd_priv_t:'La app funciona íntegramente en el navegador. La clave de API se guarda localmente y solo se envía al proveedor de IA elegido. No introduzcas datos personales de estudiantes.',
+  j0:'Conecta tu IA: OpenAI, Gemini o Claude (2 min)',
+  g_key:'Una contraseña que permite a tu app usar la IA de un proveedor (OpenAI, Google o Anthropic) y cargar el pequeño coste a tu cuenta.',
+  g_tok:'La unidad con la que los proveedores de IA miden y cobran el texto (≈ ¾ de palabra).'
+},
+en:{
+  h_autor:'Created by', lang_aria:'Language', eye_aria:'Show or hide the key',
+  s1_h:'Connect your AI provider',
+  s1_lede:'Your app will use an AI model from OpenAI, Google Gemini or Anthropic Claude with your own key. The key is like the key to your account: it is stored in this browser only and sent only to the provider you choose.',
+  s1_prov:'AI provider',
+  s1_a_sub:'Choose the provider and paste its key (OpenAI starts with sk-…, Gemini with AIza…, Claude with sk-ant-…). Press “Test” to check it works and load your key’s models.',
+  s1_lab:'API key',
+  s1_b_sub:'The recommended one is inexpensive and enough to forge the app. Press “See my key’s models” to choose among those your account has.',
+  s1_models:'See my key’s models',
+  s1_cost:'💶 <strong>How much does it cost?</strong> At OpenAI and Anthropic the minimum top-up is around $5; Google AI Studio offers a free tier with usage limits. Each generated app costs <strong>cents</strong>, and so does each student use. Set a monthly spending limit on your account before you start.',
+  s1_steps:'<li><span>Choose above the provider you already have an account with (or the one you prefer).</span></li><li><span><b>OpenAI:</b> add credit in <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener">Billing</a>, set a budget in <a href="https://platform.openai.com/settings/organization/limits" target="_blank" rel="noopener">Limits</a> and create the key in <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">API keys</a>.</span></li><li><span><b>Google Gemini:</b> open <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> and click <b>Create API key</b>.</span></li><li><span><b>Anthropic Claude:</b> in the <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Anthropic console</a> add credit and create the key.</span></li><li><span>Paste it here and press “Test”: you will see the models available to your key.</span></li>',
+  k_testing:'Checking with {p}…', k_bad:'{p} does not recognise this key. Copy it again, without spaces.', k_quota:'The key is valid, but your account has no credit or has reached its limit.', k_net:'Could not reach {p}. Check your connection.',
+  mod_cur:'current', mod_rec:'recommended', mod_notin:'not in your key', mod_other:'Other model (type it)…', mod_ph:'Type the exact model name',
+  mod_loading:'Loading your key’s models…', mod_n:'{n} models available to your key: pick one from the list.', mod_none:'Your key returned no text models. Type the name with “Other model”.', mod_nokey:'Save your key first.',
+  st_vacio:'The model returned nothing. Try again or choose another model at stop 1.', st_quota:'Your {p} account has no credit or has reached its limit. Check it and retry.', st_badkey:'{p} does not recognise your key. Check it at stop 1.',
+  st_model:'Your key has no access to the model “{m}”. Choose another at stop 1.', st_json:'The AI did not return an answer in the expected format. Please try again.', st_blocked:'The provider blocked the answer ({r}).',
+  a6_pv:'AI provider of your app', a6_m:'Model your app will use (each user can change it)',
+  rd_use_t:'1. Open the app in your browser.\n2. Click “Set up the AI”, choose the provider (OpenAI, Google Gemini or Anthropic Claude), paste your key and save it (it is stored in your browser only).\n3. Fill in the form and press the main button.',
+  rd_priv_t:'The app runs entirely in the browser. The API key is stored locally and only sent to the chosen AI provider. Do not enter personal student data.',
+  j0:'Connect your AI: OpenAI, Gemini or Claude (2 min)',
+  g_key:'A password that lets your app use an AI provider (OpenAI, Google or Anthropic) and bills the small cost to your account.',
+  g_tok:'The unit AI providers use to measure and bill text (≈ ¾ of a word).'
+},
+pt:{
+  h_autor:'Realizado por', lang_aria:'Idioma', eye_aria:'Mostrar ou ocultar a chave',
+  s1_h:'Conecte seu provedor de IA',
+  s1_lede:'Seu aplicativo usará um modelo de IA da OpenAI, do Google Gemini ou do Anthropic Claude com sua própria chave. A chave é como a chave da sua conta: fica somente neste navegador e só é enviada ao provedor que você escolher.',
+  s1_prov:'Provedor de IA',
+  s1_a_sub:'Escolha o provedor e cole a chave (OpenAI começa com sk-…, Gemini com AIza…, Claude com sk-ant-…). Clique em «Testar» para verificar se funciona e carregar os modelos da sua chave.',
+  s1_lab:'Chave de API',
+  s1_b_sub:'O recomendado é econômico e suficiente para forjar o aplicativo. Clique em «Ver os modelos da minha chave» para escolher entre os que sua conta tem.',
+  s1_models:'Ver os modelos da minha chave',
+  s1_cost:'💶 <strong>Quanto custa?</strong> Na OpenAI e na Anthropic a recarga mínima fica em torno de US$ 5; o Google AI Studio oferece um nível gratuito com limites de uso. Cada aplicativo gerado custa <strong>centavos</strong>, assim como cada uso dos estudantes. Defina um limite de gasto mensal na sua conta antes de começar.',
+  s1_steps:'<li><span>Escolha acima o provedor em que você já tem conta (ou o que preferir).</span></li><li><span><b>OpenAI:</b> adicione saldo em <a href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener">Billing</a>, defina um limite em <a href="https://platform.openai.com/settings/organization/limits" target="_blank" rel="noopener">Limits</a> e crie a chave em <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">API keys</a>.</span></li><li><span><b>Google Gemini:</b> entre no <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> e clique em <b>Create API key</b>.</span></li><li><span><b>Anthropic Claude:</b> no <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console da Anthropic</a> adicione saldo e crie a chave.</span></li><li><span>Cole-a aqui e clique em «Testar»: você verá os modelos disponíveis na sua chave.</span></li>',
+  k_testing:'Verificando com {p}…', k_bad:'{p} não reconhece esta chave. Copie de novo, sem espaços.', k_quota:'A chave é válida, mas sua conta está sem saldo ou atingiu o limite.', k_net:'Não foi possível contatar {p}. Verifique sua conexão.',
+  mod_cur:'atual', mod_rec:'recomendado', mod_notin:'não aparece na sua chave', mod_other:'Outro modelo (digitar)…', mod_ph:'Digite o nome exato do modelo',
+  mod_loading:'Carregando os modelos da sua chave…', mod_n:'{n} modelos disponíveis na sua chave: escolha um na lista.', mod_none:'Sua chave não devolveu nenhum modelo de texto. Digite o nome com «Outro modelo».', mod_nokey:'Salve sua chave primeiro.',
+  st_vacio:'O modelo não devolveu nada. Tente de novo ou escolha outro modelo na parada 1.', st_quota:'Sua conta de {p} está sem saldo ou atingiu o limite. Verifique e tente de novo.', st_badkey:'{p} não reconhece sua chave. Verifique na parada 1.',
+  st_model:'Sua chave não tem acesso ao modelo «{m}». Escolha outro na parada 1.', st_json:'A IA não devolveu uma resposta no formato esperado. Tente novamente.', st_blocked:'O provedor bloqueou a resposta ({r}).',
+  a6_pv:'Provedor de IA do seu aplicativo', a6_m:'Modelo que seu aplicativo usará (cada pessoa pode trocá-lo)',
+  rd_use_t:'1. Abra o aplicativo no navegador.\n2. Clique em «Configurar a IA», escolha o provedor (OpenAI, Google Gemini ou Anthropic Claude), cole sua chave e salve (ela fica somente no seu navegador).\n3. Preencha o formulário e clique no botão principal.',
+  rd_priv_t:'O aplicativo funciona inteiramente no navegador. A chave de API fica armazenada localmente e só é enviada ao provedor de IA escolhido. Não insira dados pessoais de estudantes.',
+  j0:'Conecte sua IA: OpenAI, Gemini ou Claude (2 min)',
+  g_key:'Uma senha que permite ao seu aplicativo usar a IA de um provedor (OpenAI, Google ou Anthropic) e cobra o pequeno custo na sua conta.',
+  g_tok:'A unidade com que os provedores de IA medem e cobram o texto (≈ ¾ de palavra).'
+}};
+['es','en','pt'].forEach(function(l){
+  var a = A[l], d = I18N[l];
+  if(d.j && d.j[0]) d.j[0] = [d.j[0][0], a.j0];
+  if(Array.isArray(d.glos)){ if(d.glos[0]) d.glos[0] = [d.glos[0][0], a.g_key]; d.glos.forEach(function(g, i){ if(/^Token/.test(g[0])) d.glos[i] = [g[0], a.g_tok]; }); }
+  delete a.j0; delete a.g_key; delete a.g_tok;
+  for(var k in a) d[k] = a[k];
+});
+})();
 </script>
 
 <script>
@@ -2065,6 +2146,7 @@ var LSX = {
 var KEY = 'ia_openai_key', LKEY = 'forjaia_lang', DKEY = 'forjaia_v2_draft', MKEY = 'forjaia_model';
 
 var lang = LSX.get(LKEY);
+try{ var qLang = new URLSearchParams(location.search).get('lang'); if(qLang && I18N[qLang]){ lang = qLang; LSX.set(LKEY, lang); } }catch(e){}
 if(!I18N[lang]){ var nl = (navigator.language || 'es').slice(0,2); lang = I18N[nl] ? nl : 'es'; }
 function t(k){ return (I18N[lang] && I18N[lang][k] !== undefined) ? I18N[lang][k] : I18N.es[k]; }
 function fmt(s, o){ return String(s).replace(/\{(\w+)\}/g, function(_, k){ return o[k] != null ? o[k] : ''; }); }
@@ -2078,7 +2160,6 @@ var TICO = {generador:'doc', chat:'chat', quiz:'quiz', tarjetas:'cards', feynman
 var TEMO = {generador:'📄', chat:'💬', quiz:'✅', tarjetas:'🗂️', feynman:'💡'};
 var EMOJIS = ['📄','💬','✅','🗂️','💡','🩺','💊','🧬','⚖️','🏗️','⚙️','🏛️','🎨','📚','🗣️','🌍','📊','💻','⚛️','🧪','🌱','💼','🎓','🧠','🎵','🔬'];
 var SWATCH = ['#E4572E','#0E8C7A','#6B4FD8','#C98200','#1F6FB2','#BE185D','#15803D','#334155'];
-var MODELOS = [['gpt-6-luna','★'],['gpt-4o-mini',''],['gpt-5.6-luna',''],['gpt-5.6-terra',''],['gpt-5.6-sol',''],['gpt-4o',''],['gpt-4.1-mini','']];
 var NOMBRE_IDIOMA = {es:'español', en:'inglés', pt:'portugués de Brasil (variante brasileña, no de Portugal)'};
 var ETIQ_IDIOMA = {es:'Español', en:'English', pt:'Português'};
 
@@ -2106,11 +2187,12 @@ function aplicaIdioma(){
   document.documentElement.lang = lang;
   document.title = t('doc');
   qsa('[data-i18n]').forEach(function(el){ var v = t(el.dataset.i18n); if(typeof v === 'string') el.innerHTML = v; });
-  qsa('.lang-b').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lang === lang ? 'true' : 'false'); });
+  qsa('[data-i18n-attr]').forEach(function(el){ el.dataset.i18nAttr.split(';').forEach(function(par){ var kv = par.split(':'), v = t(kv[1]); if(kv[0] && typeof v === 'string') el.setAttribute(kv[0], v); }); });
+  $('selLang').value = lang; $('selLang').setAttribute('aria-label', t('lang_aria'));
   pintaModelos(); pintaStepper(); pintaHome(); pintaGlosario(); pintaDraft();
   entra(S.step, true);
 }
-qsa('.lang-b').forEach(function(b){ b.onclick = function(){ lang = b.dataset.lang; LSX.set(LKEY, lang); aplicaIdioma(); }; });
+$('selLang').onchange = function(){ if(!I18N[this.value]) return; lang = this.value; LSX.set(LKEY, lang); aplicaIdioma(); };
 
 /* ══ Navegación ══ */
 function puedeIr(n){
@@ -2245,42 +2327,93 @@ function abreEjemplo(i){
   ir(4);
 }
 
-/* ══ 1 · CLAVE ══ */
+/* ══ 1 · CLAVE: proveedor (OpenAI, Google Gemini, Anthropic Claude), clave y modelo ══
+   Las claves viven solo en este navegador. El modelo se elige en un <select> con los modelos que devuelve la propia clave
+   (no en un <datalist>: con el campo relleno, el navegador filtra la lista y parece vacía). «Otro modelo…» abre un campo libre. */
+var PROV = {
+  openai:   {n:'OpenAI', m:'gpt-6-luna', k:'ia_openai_key', ph:'sk-...'},
+  gemini:   {n:'Google Gemini', m:'gemini-2.5-flash', k:'forjaia_key_gemini', ph:'AIza...'},
+  anthropic:{n:'Anthropic Claude', m:'claude-haiku-4-5-20251001', k:'forjaia_key_anthropic', ph:'sk-ant-...'}
+};
+var PKEY = 'forjaia_prov', OTRO = '__otro__';
+var PATRON_MOD = {openai:/^(gpt|o\d|chatgpt)/i, gemini:/^gemini/i, anthropic:/^claude/i};
+function getProv(){ var p = LSX.get(PKEY); return PROV[p] ? p : 'openai'; }
+function getKey(p){ p = p || getProv(); return (LSX.get(PROV[p].k) || '').trim(); }
+function getMod(p){ p = p || getProv(); var m = LSX.get('forjaia_model_' + p) || (p === 'openai' ? LSX.get(MKEY) : ''); return m || PROV[p].m; }
+function listaGuardada(p){ try{ var l = JSON.parse(LSX.get('forjaia_models_' + p) || 'null'); return Array.isArray(l) ? l : null; }catch(e){ return null; } }
+function opcionesModelo(p, actual, marcarActual){
+  var lista = listaGuardada(p) || [], vistos = {}, h = '';
+  var add = function(id, etiqueta){ if(!id || vistos[id]) return; vistos[id] = 1; h += '<option value="' + esc(id) + '">' + esc(id + etiqueta) + '</option>'; };
+  var marca = function(id){ var x = []; if(marcarActual && id === actual) x.push(t('mod_cur')); if(id === PROV[p].m) x.push(t('mod_rec')); if(lista.length && lista.indexOf(id) < 0) x.push(t('mod_notin')); return x.length ? ' — ' + x.join(' · ') : ''; };
+  add(actual, marca(actual)); add(PROV[p].m, marca(PROV[p].m));
+  lista.forEach(function(id){ add(id, marca(id)); });
+  return h + '<option value="' + OTRO + '">' + esc(t('mod_other')) + '</option>';
+}
 function pintaModelos(){
-  var sel = $('modelo'), guardado = LSX.get(MKEY) || 'gpt-6-luna';
-  var rec = {es:' — recomendado', en:' — recommended', pt:' — recomendado'}[lang];
-  sel.innerHTML = MODELOS.map(function(m){ return '<option value="' + m[0] + '">' + m[0] + (m[1] ? rec : '') + '</option>'; }).join('');
-  sel.value = guardado;
-  var s2 = $('sModelo');
-  s2.innerHTML = sel.innerHTML;
-  if(S.spec) s2.value = S.spec.modelo;
+  var p = getProv(), act = getMod(p), sel = $('selModelo');
+  sel.innerHTML = opcionesModelo(p, act, true); sel.value = act;
+  $('modelo').hidden = true; $('modelo').value = act; $('modelo').placeholder = t('mod_ph');
+  pintaModeloApp();
 }
-$('modelo').onchange = function(){ LSX.set(MKEY, this.value); };
-function luz(s, msg){ $('keyLight').dataset.s = s; $('keyMsg').textContent = msg; }
+function pintaModeloApp(){
+  var s2 = $('sModelo'); if(!s2 || !S.spec) return;
+  var p = S.spec.proveedor || getProv();
+  $('sProv').value = p;
+  s2.innerHTML = opcionesModelo(p, S.spec.modelo, false).replace('<option value="' + OTRO + '">' + esc(t('mod_other')) + '</option>', '');
+  s2.value = S.spec.modelo;
+}
+$('selModelo').onchange = function(){
+  var v = this.value, p = getProv();
+  if(v === OTRO){ $('modelo').hidden = false; $('modelo').value = ''; $('modelo').focus(); return; }
+  $('modelo').hidden = true; LSX.set('forjaia_model_' + p, v);
+};
+$('modelo').oninput = function(){ LSX.set('forjaia_model_' + getProv(), this.value.trim() || PROV[getProv()].m); };
+$('modelo').onchange = function(){ pintaModelos(); };
+function luz(st, msg){ $('keyLight').dataset.s = st; $('keyMsg').textContent = msg; }
 function pintaClave(){
-  var k = LSX.get(KEY) || '';
-  if(k && !$('apikey').value) $('apikey').value = k;
-  if(!$('keyLight').dataset.s) luz(k ? 'ok' : '', k ? t('k_loaded') : t('k_none'));
+  var p = getProv(), k = getKey(p);
+  $('selProv').value = p;
+  $('apikey').placeholder = PROV[p].ph;
+  if(document.activeElement !== $('apikey')) $('apikey').value = k;
+  luz(k ? 'ok' : '', k ? t('k_loaded') : t('k_none'));
+  pintaModelos();
 }
+$('selProv').onchange = function(){
+  LSX.set(PKEY, this.value); estado('modStatus', '', '');
+  pintaClave();
+  if(getKey() && !listaGuardada(getProv())) cargaModelos(true);
+};
 $('btnEye').onclick = function(){ var i = $('apikey'); i.type = i.type === 'password' ? 'text' : 'password'; };
 $('btnKeySave').onclick = function(){
-  var v = $('apikey').value.trim();
+  var v = $('apikey').value.trim(), p = getProv();
   if(!v){ luz('err', t('k_need')); return; }
-  LSX.set(KEY, v); luz('ok', t('k_saved')); probarClave(true);
+  if(v !== getKey(p)) LSX.del('forjaia_models_' + p);
+  LSX.set(PROV[p].k, v); luz('ok', t('k_saved')); probarClave(true);
 };
-$('btnKeyWipe').onclick = function(){ LSX.del(KEY); $('apikey').value = ''; luz('', t('k_wiped')); };
+$('btnKeyWipe').onclick = function(){ var p = getProv(); LSX.del(PROV[p].k); LSX.del('forjaia_models_' + p); $('apikey').value = ''; luz('', t('k_wiped')); pintaModelos(); };
 $('btnKeyTest').onclick = function(){ probarClave(false); };
+$('btnModelos').onclick = function(){ cargaModelos(false); };
+/* comprobar la clave = pedir al proveedor la lista de modelos de ESA clave (y de paso rellenar el desplegable) */
 function probarClave(silencio){
-  var v = $('apikey').value.trim();
+  var v = $('apikey').value.trim(), p = getProv();
   if(!v){ luz('err', t('k_need')); return; }
-  luz('wait', t('k_testing'));
-  fetch('https://api.openai.com/v1/models', {headers:{'Authorization':'Bearer ' + v}})
-    .then(function(r){
-      if(r.ok){ LSX.set(KEY, v); luz('ok', t('k_ok')); if(!silencio) toast('✅ ' + t('k_ok')); }
-      else if(r.status === 429) luz('err', t('k_quota'));
-      else luz('err', t('k_bad'));
-    })
-    .catch(function(){ luz('err', t('k_net')); });
+  luz('wait', fmt(t('k_testing'), {p:PROV[p].n}));
+  listaModelos(p, v).then(function(l){
+    LSX.set(PROV[p].k, v); LSX.set('forjaia_models_' + p, JSON.stringify(l)); pintaModelos();
+    luz('ok', t('k_ok')); estado('modStatus', fmt(t('mod_n'), {n:l.length}), 'ok');
+    if(!silencio) toast('✅ ' + t('k_ok'));
+  }).catch(function(e){
+    luz('err', e.code === 'quota' ? t('k_quota') : e.code === 'net' ? fmt(t('k_net'), {p:PROV[p].n}) : e.code === 'badkey' ? fmt(t('k_bad'), {p:PROV[p].n}) : errorLegible(e));
+  });
+}
+function cargaModelos(silencio){
+  var p = getProv();
+  if(!getKey(p)){ if(!silencio) estado('modStatus', t('mod_nokey'), 'err'); return; }
+  estado('modStatus', t('mod_loading'), '');
+  listaModelos(p).then(function(l){
+    LSX.set('forjaia_models_' + p, JSON.stringify(l)); pintaModelos();
+    estado('modStatus', l.length ? fmt(t('mod_n'), {n:l.length}) : t('mod_none'), l.length ? 'ok' : 'err');
+  }).catch(function(e){ estado('modStatus', errorLegible(e), 'err'); });
 }
 
 /* ══ 3 · DESCRIBE ══ */
@@ -2330,37 +2463,136 @@ function calidad(){
   $('qMsg').textContent = t('qm')[n <= 1 ? 0 : n < 4 ? 1 : 2];
 }
 
-/* ══ Llamadas a OpenAI desde ForjaIA ══ */
-function razona(m){ return /^(gpt-[56]|o[134])/.test(m || ''); }
-function cuerpo(modelo, mensajes, maxTok, json){
-  var b = {model: modelo, messages: mensajes};
-  if(json) b.response_format = {type:'json_object'};
-  if(razona(modelo)){ b.reasoning_effort = 'low'; b.max_completion_tokens = (maxTok || 1600) * 4; }
-  else { b.temperature = 0.6; b.max_tokens = maxTok || 1600; }
-  return b;
+/* ══ Llamadas a la IA desde ForjaIA (OpenAI, Gemini o Claude, con la clave de la persona) ══ */
+function espera(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+function errIA(code, msg, extra){ var e = new Error(msg || code); e.code = code; if(extra) e.extra = extra; return e; }
+function errHTTP(st, tx, p, mod){
+  if(st === 401 || st === 403 || (p === 'gemini' && st === 400 && /API key|API_KEY/i.test(tx))) return errIA('badkey', tx);
+  if(st === 404 || /model_not_found|not found|does not exist/i.test(tx)) return errIA('model', tx, mod);
+  if(st === 429 && /quota|billing|credit|RESOURCE_EXHAUSTED|insufficient/i.test(tx)) return errIA('quota', tx);
+  return errIA('http', PROV[p].n + ' ' + st + ': ' + String(tx).slice(0, 180));
 }
-function llama(mensajes, maxTok){
-  var key = LSX.get(KEY) || $('apikey').value.trim();
-  if(!key) return Promise.reject(new Error('__NOKEY__'));
-  return fetch('https://api.openai.com/v1/chat/completions', {
-    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + key},
-    body: JSON.stringify(cuerpo($('modelo').value || 'gpt-6-luna', mensajes, maxTok, true))
-  }).then(function(r){
-    if(!r.ok) return r.json().catch(function(){ return {}; }).then(function(e){ throw new Error((e.error && e.error.message) || ('Error ' + r.status)); });
-    return r.json();
-  }).then(function(d){
-    var txt = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
-    if(!txt.trim()) throw new Error('__VACIO__');
-    try{ return JSON.parse(txt); }catch(e){ var m = txt.match(/\{[\s\S]*\}/); if(m) return JSON.parse(m[0]); throw e; }
+/* reintenta ante 429 sin saldo no, ante saturación (429/5xx) sí, y ante fallos de red dos veces */
+function conReintentos(fn, p){
+  var k = 0;
+  function va(){
+    return fn().then(function(r){
+      if(r.ok || k >= 4) return r;
+      if(r.status === 429 || r.status >= 500){
+        return r.clone().text().then(function(tx){
+          if(r.status === 429 && /quota|billing|credit|insufficient/i.test(tx)) return r;
+          k++; return espera(Math.pow(2, k) * 700).then(va);
+        });
+      }
+      return r;
+    }, function(){ if(k >= 2) throw errIA('net'); k++; return espera(1200).then(va); });
+  }
+  return va();
+}
+function listaModelos(p, key){
+  key = key || getKey(p);
+  if(!key) return Promise.reject(errIA('nokey'));
+  var req = p === 'openai' ? fetch('https://api.openai.com/v1/models', {headers:{'Authorization':'Bearer ' + key}})
+    : p === 'gemini' ? fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', {headers:{'x-goog-api-key': key}})
+    : fetch('https://api.anthropic.com/v1/models?limit=100', {headers:{'x-api-key': key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true'}});
+  return req.then(function(r){
+    return r.text().then(function(tx){
+      if(!r.ok) throw errHTTP(r.status, tx, p, '');
+      var j = JSON.parse(tx);
+      if(p === 'openai') return (j.data || []).map(function(m){ return m.id; }).filter(function(id){ return /^(gpt-|o\d|chatgpt-)/.test(id) && !/(audio|realtime|transcribe|tts|image|embedding|moderation|search|instruct|whisper|dall|davinci|babbage|codex|computer-use)/i.test(id); }).sort();
+      if(p === 'gemini') return (j.models || []).filter(function(m){ return (m.supportedGenerationMethods || []).indexOf('generateContent') > -1; }).map(function(m){ return m.name.replace(/^models\//, ''); }).sort();
+      return (j.data || []).map(function(m){ return m.id; }).sort();
+    });
+  }, function(){ throw errIA('net'); });
+}
+/* mensajes estilo OpenAI [{role, content:string}] → texto de la respuesta */
+function llmTexto(msgs, max, json){
+  var p = getProv(), key = getKey(p) || ($('apikey').value || '').trim(), mod = getMod(p);
+  if(!key) return Promise.reject(errIA('nokey'));
+  var sys = msgs.filter(function(m){ return m.role === 'system'; }).map(function(m){ return m.content; }).join('\n\n');
+  var conv = [];
+  msgs.filter(function(m){ return m.role !== 'system'; }).forEach(function(m){
+    var r = m.role === 'assistant' ? 'assistant' : 'user';
+    if(conv.length && conv[conv.length - 1].role === r) conv[conv.length - 1].text += '\n\n' + m.content; else conv.push({role:r, text:String(m.content)});
   });
+  if(!conv.length || conv[0].role !== 'user') conv.unshift({role:'user', text:'.'});
+  if(p === 'openai'){
+    var o = {json:!!json, raz: /^(gpt-[56]|o\d)/.test(mod), temp: !/^(gpt-[56]|o\d)/.test(mod)}; o.comp = o.raz;
+    var intento = 0;
+    var una = function(){
+      var b = {model:mod, messages:msgs};
+      if(o.json) b.response_format = {type:'json_object'};
+      if(o.comp) b.max_completion_tokens = max * (o.raz ? 4 : 1); else b.max_tokens = max;
+      if(o.raz) b.reasoning_effort = 'low';
+      if(o.temp) b.temperature = 0.6;
+      return conReintentos(function(){ return fetch('https://api.openai.com/v1/chat/completions', {method:'POST', headers:{'Content-Type':'application/json', 'Authorization':'Bearer ' + key}, body:JSON.stringify(b)}); }, p)
+        .then(function(r){
+          return r.text().then(function(tx){
+            if(r.ok){ var d = JSON.parse(tx); return (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || ''; }
+            if(r.status === 400 && intento++ < 5){
+              if(/reasoning_effort/i.test(tx) && o.raz){ o.raz = false; return una(); }
+              if(/max_completion_tokens/i.test(tx) && o.comp){ o.comp = false; return una(); }
+              if(/max_tokens/i.test(tx) && !o.comp){ o.comp = true; return una(); }
+              if(/temperature/i.test(tx) && o.temp){ o.temp = false; return una(); }
+              if(/response_format/i.test(tx) && o.json){ o.json = false; return una(); }
+            }
+            throw errHTTP(r.status, tx, p, mod);
+          });
+        });
+    };
+    return una();
+  }
+  if(p === 'gemini'){
+    var gb = {contents: conv.map(function(m){ return {role: m.role === 'assistant' ? 'model' : 'user', parts:[{text:m.text}]}; }), generationConfig:{maxOutputTokens: Math.max(max * 3, 4096), temperature:0.6}};
+    if(sys) gb.systemInstruction = {parts:[{text:sys}]};
+    if(json) gb.generationConfig.responseMimeType = 'application/json';
+    return conReintentos(function(){ return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(mod) + ':generateContent', {method:'POST', headers:{'Content-Type':'application/json', 'x-goog-api-key':key}, body:JSON.stringify(gb)}); }, p)
+      .then(function(r){ return r.text().then(function(tx){
+        if(!r.ok) throw errHTTP(r.status, tx, p, mod);
+        var j = JSON.parse(tx), c = j.candidates && j.candidates[0], partes = (c && c.content && c.content.parts) || [];
+        var txt = partes.map(function(x){ return x.text || ''; }).join('');
+        if(!txt && j.promptFeedback && j.promptFeedback.blockReason) throw errIA('blocked', j.promptFeedback.blockReason);
+        return txt;
+      }); });
+  }
+  var cm = conv.map(function(m){ return {role:m.role, content:m.text}; });
+  if(json) cm[cm.length - 1].content += '\n\nResponde SOLO con un objeto JSON válido, sin texto alrededor.';
+  return conReintentos(function(){ return fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true'}, body:JSON.stringify({model:mod, max_tokens:Math.max(max * 2, 2048), system:sys, messages:cm})}); }, p)
+    .then(function(r){ return r.text().then(function(tx){
+      if(!r.ok) throw errHTTP(r.status, tx, p, mod);
+      return (JSON.parse(tx).content || []).filter(function(b){ return b.type === 'text'; }).map(function(b){ return b.text; }).join('');
+    }); });
+}
+function parseJSON(txt){
+  txt = String(txt || '').trim().replace(/^```(?:json)?\s*|\s*```$/g, '');
+  try{ return JSON.parse(txt); }catch(e){ var m = txt.match(/\{[\s\S]*\}/); if(m){ try{ return JSON.parse(m[0]); }catch(e2){} } }
+  return null;
+}
+/* devuelve un objeto JSON; si la IA no lo da bien a la primera, se repite una vez */
+function llama(mensajes, maxTok){
+  var n = 0;
+  function va(){
+    return llmTexto(mensajes, maxTok || 1600, true).then(function(txt){
+      if(!String(txt).trim()) throw errIA('vacio');
+      var j = parseJSON(txt);
+      if(j && typeof j === 'object') return j;
+      if(n++ < 1) return va();
+      throw errIA('json');
+    });
+  }
+  return va();
 }
 function errorLegible(e){
-  var m = (e && e.message) || '';
-  if(m === '__NOKEY__') return t('st_nokey');
-  if(m === '__VACIO__') return t('st_vacio');
-  if(/quota|billing/i.test(m)) return t('st_quota');
-  if(/Incorrect API key|invalid_api_key/.test(m)) return t('st_badkey');
-  return m || 'Error';
+  var c = (e && e.code) || '', p = PROV[getProv()].n;
+  if(c === 'nokey' || (e && e.message === '__NOKEY__')) return t('st_nokey');
+  if(c === 'vacio') return t('st_vacio');
+  if(c === 'json') return t('st_json');
+  if(c === 'quota') return fmt(t('st_quota'), {p:p});
+  if(c === 'badkey') return fmt(t('st_badkey'), {p:p});
+  if(c === 'model') return fmt(t('st_model'), {m:e.extra || getMod()});
+  if(c === 'net') return fmt(t('k_net'), {p:p});
+  if(c === 'blocked') return fmt(t('st_blocked'), {r:e.message});
+  return (e && e.message) || 'Error';
 }
 
 /* ══ Forjar la especificación ══ */
@@ -2480,7 +2712,8 @@ function normaliza(s, tipo, base){
   s.systemPrompt = s.systemPrompt || '';
   s.instruccionSalida = s.instruccionSalida || '';
   s.botonLabel = s.botonLabel || t('blank_btn');
-  s.modelo = s.modelo || LSX.get(MKEY) || 'gpt-6-luna';
+  if(!PROV[s.proveedor]) s.proveedor = (s.modelo && /^(gpt|o\d|chatgpt)/i.test(s.modelo)) ? 'openai' : (s.modelo && /^gemini/i.test(s.modelo)) ? 'gemini' : (s.modelo && /^claude/i.test(s.modelo)) ? 'anthropic' : getProv();
+  if(!s.modelo || !PATRON_MOD[s.proveedor].test(s.modelo)) s.modelo = getMod(s.proveedor);
   s.campos = idsUnicos((Array.isArray(s.campos) ? s.campos : []).map(normCampo));
   s.opciones = s.opciones || {};
   if(s.n) s.opciones.n = +s.n; if(s.formato) s.opciones.formato = s.formato; if(s.refinar !== undefined) s.opciones.refinar = !!s.refinar;
@@ -2531,7 +2764,8 @@ function pintaAjusta(){
   $('swatches').innerHTML = SWATCH.map(function(c){ return '<button type="button" class="sw" data-sw="' + c + '" style="--c:' + c + '" aria-pressed="' + (s.color === c) + '" aria-label="' + c + '"></button>'; }).join('');
   qsa('[data-sw]').forEach(function(b){ b.onclick = function(){ s.color = b.dataset.sw; qsa('[data-sw]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); refrescaVista(); guarda(); }; });
   pillsEncargo(); pintaCampos(); pintaIdiomas();
-  $('sModelo').value = s.modelo;
+  pintaModeloApp();
+  $('sProv').onchange = function(){ s.proveedor = this.value; s.modelo = getMod(s.proveedor); pintaModeloApp(); refrescaVista(); guarda(); };
   vistaPrevia($('pvLive'), $('pvUrlLive'));
 }
 function pillsEncargo(){
@@ -2643,7 +2877,7 @@ function construye(s, previewKey){
       campos: s.campos.map(function(c, i){ var x = tr.campos[i] || {}; return {label:x.label || c.label, placeholder:x.placeholder || c.placeholder, opciones:(x.opciones && x.opciones.length) ? x.opciones : c.opciones}; })
     };
   });
-  var payload = {forja:2, tipo:s.tipo, slug:s.slug, modelo:s.modelo, icono:s.icono, color:s.color, systemPrompt:s.systemPrompt, instruccionSalida:s.instruccionSalida,
+  var payload = {forja:2, tipo:s.tipo, slug:s.slug, proveedor:s.proveedor || 'openai', modelo:s.modelo, icono:s.icono, color:s.color, systemPrompt:s.systemPrompt, instruccionSalida:s.instruccionSalida,
     evaluacion: s.tipo === 'chat' ? s.evaluacion : '', opciones:s.opciones, base:s.base, idiomas:idiomas,
     autor:s.autor, institucion:s.institucion, pais:s.pais, orcid:s.orcid, licencia:s.licencia,
     campos: s.campos.map(function(c){ return {id:c.id, tipo:c.tipo, opciones:c.opciones, requerido:c.requerido}; }), i18n:i18n};
@@ -2657,7 +2891,7 @@ function construye(s, previewKey){
     .replace(/__COLOR__/g, function(){ return color; })
     .replace('__SPEC__', function(){ return JSON.stringify(payload).replace(/</g, '\\u003c'); });
   if(previewKey !== undefined){
-    out = out.replace('var PREVIEW = null; /*__PREVIEW__*/', function(){ return 'var PREVIEW = ' + JSON.stringify({key: previewKey || ''}).replace(/</g, '\\u003c') + ';'; });
+    out = out.replace('var PREVIEW = null; /*__PREVIEW__*/', function(){ return 'var PREVIEW = ' + JSON.stringify({key: previewKey || '', prov: s.proveedor || 'openai'}).replace(/</g, '\\u003c') + ';'; });
   }
   return out.trim();
 }
@@ -2668,7 +2902,7 @@ function urlApp(){
 }
 function vistaPrevia(frame, urlEl){
   if(!S.spec) return;
-  frame.srcdoc = construye(S.spec, LSX.get(KEY) || $('apikey').value.trim() || '');
+  frame.srcdoc = construye(S.spec, getKey(S.spec.proveedor) || '');
   if(urlEl) urlEl.textContent = urlApp().replace('https://', '');
 }
 var pvT = null;
@@ -2681,7 +2915,7 @@ function pintaPrueba(){
   if(!S.spec.systemPrompt.trim()) toast(t('st_nosys'));
   $('pvFrame').dataset.dev = S.dev || 'desk';
   vistaPrevia($('pvTest'), $('pvUrlTest'));
-  var hayKey = !!(LSX.get(KEY) || $('apikey').value.trim());
+  var hayKey = !!getKey(S.spec.proveedor);
   $('pvTestNote').textContent = hayKey ? t('pv_note') : t('pv_nokey');
   $('testChecks').innerHTML = t('tc').map(function(x, i){ return '<li><label><input type="checkbox" data-tc="' + i + '"' + (S.tests[i] ? ' checked' : '') + '> <span>' + esc(x) + '</span></label></li>'; }).join('');
   qsa('[data-tc]').forEach(function(e){ e.onchange = function(){ S.tests[+e.dataset.tc] = e.checked; guarda(); }; });
@@ -2862,7 +3096,7 @@ $('fileOpen').onchange = function(){
         var pie = ((txt.match(/<span id="pie">([\s\S]*?)<\/span>/) || [])[1] || '').split(' · ');
         var sp = {tipo:p.tipo || 'generador', slug:p.slug, titulo:tx.titulo, subtitulo:tx.subtitulo, instrucciones:tx.instrucciones, botonLabel:tx.boton,
           bienvenida:tx.bienvenida, sugerencias:tx.sugerencias, systemPrompt:p.systemPrompt, instruccionSalida:p.instruccionSalida, evaluacion:p.evaluacion,
-          opciones:p.opciones || {}, modelo:p.modelo, icono:p.icono, color:col,
+          opciones:p.opciones || {}, proveedor:p.proveedor, modelo:p.modelo, icono:p.icono, color:col,
           autor:p.autor || pie[0] || '', institucion:p.institucion || pie[1] || '', pais:p.pais || pie[2] || '', orcid:p.orcid || '', licencia:p.licencia,
           campos:(p.campos || []).map(function(c, i){ var l = (tx.campos || [])[i] || {}; return {id:c.id, tipo:c.tipo, opciones:c.opciones, requerido:c.requerido, label:l.label, placeholder:l.placeholder}; })};
         if(sp.autor === t('autoria')) sp.autor = '';
@@ -2890,7 +3124,7 @@ document.addEventListener('keydown', function(e){ if(e.key === 'Escape') $('glos
 
 /* ══ Arranque ══ */
 aplicaIdioma();
-var k0 = LSX.get(KEY); if(k0){ $('apikey').value = k0; }
+pintaClave();
 })();
 </script>
 </body>
